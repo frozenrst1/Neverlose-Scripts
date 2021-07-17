@@ -1,4 +1,4 @@
-local LuaVersion = "4.5.1"
+local LuaVersion = "4.6"
 local SleepyYaw = menu.Switch("SleepyYaw","Enable", false, "")
 local SleepyYawMode = menu.Combo("SleepyYaw", "Mode", {"SleepyYaw","Sleeping Pill", "Random"}, 0, "")
 local SleepyYaw_On_ShotAA = menu.Switch("SleepyYaw","OnShot AA", false, "")
@@ -26,9 +26,6 @@ local E_Peek_YawModifer_Degree = menu.SliderInt("E Peek","Yaw Modifer Degree", 0
 local ClanTag_Enable = menu.Switch("Misc","ClanTag", false, "")
 local LegAA = menu.Switch("Misc","LegAA", false, "")
 local Anti_BruteForce = menu.Switch("Misc","Anti Bruteforce", false, "")
-local Rand_Sl_Vlo = menu.Switch("Misc","Random SlowWalk Vlocity", false, "")
-local Slow_Walk_Vol_Min = menu.SliderInt("Misc","Vlocity Min", 30, 30, 120)
-local Slow_Walk_Vol_Max = menu.SliderInt("Misc","Vlocity Max", 30, 30, 120)
 local text = menu.Text("Misc", "--------------------------------------------------")
 local WaterMark_Enable = menu.Switch("Misc","WaterMark", false, "")
 local WaterMark_Text_Outline = menu.Switch("Misc","Text Outline", true, "")
@@ -98,7 +95,7 @@ local Glboal_Ping = 0
 -----------------------------------------------------Some Shit------------------------------------------------------------------------
 
 local function CheckDTMode_Object()
-    if DoubleTap_Mode:GetInt() == 1 then
+    if DoubleTap_Mode:Get() == 1 then
         DT_Tickbase:SetVisible(true)
     else
         DT_Tickbase:SetVisible(false)
@@ -109,11 +106,11 @@ DoubleTap_Mode:RegisterCallback(CheckDTMode_Object)
 CheckDTMode_Object()
 
 local function SleepyYawMode_Callback()
-    if SleepyYawMode:GetInt() == 2 then
+    if SleepyYawMode:Get() == 2 then
         Yaw_Limit_Min:SetVisible(true)
         Yaw_Limit_Max:SetVisible(true)
         Lagsync_speed:SetVisible(true)
-    elseif SleepyYawMode:GetInt() ~= 2 then
+    elseif SleepyYawMode:Get() ~= 2 then
         Yaw_Limit_Min:SetVisible(false)
         Yaw_Limit_Max:SetVisible(false)
         Lagsync_speed:SetVisible(false)
@@ -274,8 +271,8 @@ end
 local m_max_delta = function()        
     
     -- get local player.
-    local _ent_idx = g_EngineClient:GetLocalPlayer()
-    local _ent = g_EntityList:GetClientEntity(_ent_idx)
+    local _ent_idx = EngineClient.GetLocalPlayer()
+    local _ent = EntityList.GetClientEntity(_ent_idx)
     local local_player = _ent:GetPlayer()
     
     -- Get a local player
@@ -395,7 +392,7 @@ local function CalcDesync()
 end
 
 function GetvecVelocity()
-    local me = g_EntityList:GetClientEntity(g_EngineClient:GetLocalPlayer())
+    local me = EntityList.GetClientEntity(EngineClient.GetLocalPlayer())
     local velocity0 = me:GetProp("m_vecVelocity[0]")
     local velocity1 = me:GetProp("m_vecVelocity[1]")
     local velocity2 = me:GetProp("m_vecVelocity[2]")
@@ -404,7 +401,7 @@ function GetvecVelocity()
 end
 
 function GetHandWeaponID()
-    local me = g_EntityList:GetClientEntity(g_EngineClient:GetLocalPlayer())
+    local me = EntityList.GetClientEntity(EngineClient.GetLocalPlayer())
     if me == nil then
         return 0
     end
@@ -431,7 +428,7 @@ end
 
 local function get_closest_player()
     -- Get local player entindex and origin so we can get the distance of players from that point
-    local me = g_EntityList:GetClientEntity(g_EngineClient:GetLocalPlayer())
+    local me = EntityList.GetClientEntity(EngineClient.GetLocalPlayer())
     local Local_Orig = me:GetProp("m_vecOrigin")
     
     local closest_ent = nil
@@ -442,7 +439,7 @@ local function get_closest_player()
     end
 
     for i = 1, 64 do
-        local entity = g_EntityList:GetClientEntity(i)
+        local entity = EntityList.GetClientEntity(i)
         if entity ~= nil and entity ~= me then
             if entity:IsPlayer() == true then
                 local player = entity:GetPlayer()
@@ -470,25 +467,25 @@ local function get_closest_player()
 end
 
 menu.Button("Indicator Setting", "Reset Desync Indicator Pos"):RegisterCallback(function()
-    Desync_Pos_X:SetInt(0)
-    Desync_Pos_Y:SetInt(0)
+    Desync_Pos_X:Set(0)
+    Desync_Pos_Y:Set(0)
 end)
 
 menu.Button("Indicator Setting", "Reset FakeLag Indicator Pos"):RegisterCallback(function()
-    FL_Pos_X:SetInt(0)
-    FL_Pos_Y:SetInt(0)
+    FL_Pos_X:Set(0)
+    FL_Pos_Y:Set(0)
 end)
 
 menu.Button("Indicator Setting", "Reset DT Indicator Pos"):RegisterCallback(function()
-    DT_Pos_X:SetInt(0)
-    DT_Pos_Y:SetInt(0)
+    DT_Pos_X:Set(0)
+    DT_Pos_Y:Set(0)
 end)
 
 ----------------------------------------------------------EdgeYaw----------------------------------------------------------------------------------
 local YawAdd_Brute = 0
-local restore_yawbase = g_Config:FindVar("Aimbot", "Anti Aim", "Main", "Yaw Base"):GetInt()
+local restore_yawbase = Menu.FindVar("Aimbot", "Anti Aim", "Main", "Yaw Base"):Get()
 local function DoEdgeYaw()
-    local LocalPlayer = g_EntityList:GetClientEntity(g_EngineClient:GetLocalPlayer())
+    local LocalPlayer = EntityList.GetClientEntity(EngineClient.GetLocalPlayer())
     local gPlayer = LocalPlayer:GetPlayer()
     
     local IsWeapon = false
@@ -499,20 +496,20 @@ local function DoEdgeYaw()
         local weapon = player:GetActiveWeapon()
         if weapon ~= nil then
             local weapon_id = weapon:GetWeaponID()
-            if bit.band(SleepyYaw_Edge_Condition:GetInt(),1) == 1 and weapon_id == 40 then --Scout
+            if bit.band(SleepyYaw_Edge_Condition:Get(),1) == 1 and weapon_id == 40 then --Scout
                 IsWeapon = true
-            elseif bit.band(SleepyYaw_Edge_Condition:GetInt(),2) == 2 and weapon_id == 9 then --AWP
+            elseif bit.band(SleepyYaw_Edge_Condition:Get(),2) == 2 and weapon_id == 9 then --AWP
                 IsWeapon = true
-            elseif bit.band(SleepyYaw_Edge_Condition:GetInt(),4) == 4 and (weapon_id == 11 or weapon_id == 38) then --Auto
+            elseif bit.band(SleepyYaw_Edge_Condition:Get(),4) == 4 and (weapon_id == 11 or weapon_id == 38) then --Auto
                 IsWeapon = true
-            elseif bit.band(SleepyYaw_Edge_Condition:GetInt(),8) == 8 and weapon:IsRifle() == true then --Rifle
+            elseif bit.band(SleepyYaw_Edge_Condition:Get(),8) == 8 and weapon:IsRifle() == true then --Rifle
                 IsWeapon = true
-            elseif bit.band(SleepyYaw_Edge_Condition:GetInt(),16) == 16 and weapon:IsPistol() == true then --Pistol
+            elseif bit.band(SleepyYaw_Edge_Condition:Get(),16) == 16 and weapon:IsPistol() == true then --Pistol
                 IsWeapon = true
             else
                 IsWeapon = false
                 if EdgeYaw_Is_Run == true then
-                    g_Config:FindVar("Aimbot", "Anti Aim", "Main", "Yaw Base"):SetInt(SleepyYaw_Edge_YawBase_Restore:GetInt())
+                    Menu.FindVar("Aimbot", "Anti Aim", "Main", "Yaw Base"):Set(SleepyYaw_Edge_YawBase_Restore:Get())
                     EdgeYaw_Is_Run = false
                 end
             end
@@ -523,7 +520,7 @@ local function DoEdgeYaw()
         local is_visible = false
         local traced
         for y = 0, 360 do
-            local view_angles_yaw = g_EngineClient:GetViewAngles().yaw
+            local view_angles_yaw = EngineClient.GetViewAngles().yaw
             view_angles_yaw = view_angles_yaw + y
             local tmpe = Vector.new(10.0, view_angles_yaw, 0.0)
             tmpe.y = tmpe.y + y;
@@ -532,7 +529,7 @@ local function DoEdgeYaw()
             forward.x = forward.x * length
             forward.y = forward.y * length
             forward.z = forward.z * length
-            traced = g_EngineTrace:TraceRay(gPlayer:GetEyePosition(), gPlayer:GetEyePosition() + forward, LocalPlayer, 0x200400B)
+            traced = EngineTrace.TraceRay(gPlayer:GetEyePosition(), gPlayer:GetEyePosition() + forward, LocalPlayer, 0x200400B)
         end
         
         local Bullet = cheat.FireBullet(gPlayer, gPlayer:GetEyePosition(), player:GetHitboxCenter(0))
@@ -540,39 +537,43 @@ local function DoEdgeYaw()
         local Bullet3 = cheat.FireBullet(gPlayer, gPlayer:GetEyePosition(), player:GetHitboxCenter(12))
         local Bullet4 = cheat.FireBullet(gPlayer, gPlayer:GetEyePosition(), player:GetHitboxCenter(16))
         local Bullet5 = cheat.FireBullet(gPlayer, gPlayer:GetEyePosition(), player:GetHitboxCenter(18))
-        if Bullet.damage >= 0 or Bullet2.damage >= 0 or Bullet3.damage >= 0 or Bullet4.damage >= 0 or Bullet5.damage >= 0 or traced.fraction >= 0.95 then
-            is_visible = true
+        if traced.fraction >= 0.93 then
+            if Bullet.damage > 0 or Bullet2.damage > 0 or Bullet3.damage > 0 or Bullet4.damage > 0 or Bullet5.damage > 0 then
+                is_visible = true
+            else
+                is_visible = false
+            end
         else
-            is_visible = false
+            is_visible = true
         end
         
         if is_visible == false then
-            g_Config:FindVar("Aimbot", "Anti Aim", "Main", "Yaw Base"):SetInt(0)
-            g_Config:FindVar("Aimbot", "Anti Aim", "Fake Angle", "Fake Options"):SetInt(0)
-            g_Config:FindVar("Aimbot", "Anti Aim", "Main" ,"Yaw Add"):SetInt(0)
-            g_Config:FindVar("Aimbot", "Anti Aim", "Fake Angle", "Left Limit"):SetInt(57)
-            g_Config:FindVar("Aimbot", "Anti Aim", "Fake Angle", "Right Limit"):SetInt(57)
-            g_Config:FindVar("Aimbot", "Anti Aim", "Main" ,"Modifier Degree"):SetInt(0)
+            Menu.FindVar("Aimbot", "Anti Aim", "Main", "Yaw Base"):Set(0)
+            Menu.FindVar("Aimbot", "Anti Aim", "Fake Angle", "Fake Options"):Set(0)
+            Menu.FindVar("Aimbot", "Anti Aim", "Main" ,"Yaw Add"):Set(0)
+            Menu.FindVar("Aimbot", "Anti Aim", "Fake Angle", "Left Limit"):Set(57)
+            Menu.FindVar("Aimbot", "Anti Aim", "Fake Angle", "Right Limit"):Set(57)
+            Menu.FindVar("Aimbot", "Anti Aim", "Main" ,"Modifier Degree"):Set(0)
             EdgeYaw_Is_Run = true
         else
-            g_Config:FindVar("Aimbot", "Anti Aim", "Main", "Yaw Base"):SetInt(SleepyYaw_Edge_YawBase_Restore:GetInt())
+            Menu.FindVar("Aimbot", "Anti Aim", "Main", "Yaw Base"):Set(SleepyYaw_Edge_YawBase_Restore:Get())
             EdgeYaw_Is_Run = false
         end
     else
         if EdgeYaw_Is_Run == true then
-            g_Config:FindVar("Aimbot", "Anti Aim", "Main", "Yaw Base"):SetInt(SleepyYaw_Edge_YawBase_Restore:GetInt())
+            Menu.FindVar("Aimbot", "Anti Aim", "Main", "Yaw Base"):Set(SleepyYaw_Edge_YawBase_Restore:Get())
             EdgeYaw_Is_Run = false
         end
     end
 end
 local EdgeTimer = 0
 local function EdgeYaw_Thread() -- when createmove running weapon shoot will lagging 1 tick
-    if g_EngineClient:IsInGame() == true then
+    if EngineClient.IsInGame() == true then
         if g_GlobalVars.tickcount - EdgeTimer > 3 then -- 運行太快fps過低
             EdgeTimer = g_GlobalVars.tickcount
-            local me = g_EntityList:GetClientEntity(g_EngineClient:GetLocalPlayer())
+            local me = EntityList.GetClientEntity(EngineClient.GetLocalPlayer())
             if me ~= nil then
-                if SleepyYaw_Edge:GetBool() == true and E_Peek_Is_Run == false then
+                if SleepyYaw_Edge:Get() == true and E_Peek_Is_Run == false then
                     DoEdgeYaw()
                 end
             end
@@ -582,38 +583,38 @@ end
 
 local function EdgeYaw_Callback()
     if EdgeYaw_Is_Run == true then
-        g_Config:FindVar("Aimbot", "Anti Aim", "Main", "Yaw Base"):SetInt(SleepyYaw_Edge_YawBase_Restore:GetInt())
+        Menu.FindVar("Aimbot", "Anti Aim", "Main", "Yaw Base"):Set(SleepyYaw_Edge_YawBase_Restore:Get())
         Edge_IsRestore = false
         EdgeYaw_Is_Run = false
     end
 end
 SleepyYaw_Edge:RegisterCallback(EdgeYaw_Callback)
 ----------------------------------------------------------SleepyYaw----------------------------------------------------------------------------------
-local ref_slow_walk = g_Config:FindVar("Aimbot", "Anti Aim", "Misc", "Slow Walk")
+local ref_slow_walk = Menu.FindVar("Aimbot", "Anti Aim", "Misc", "Slow Walk")
 local function DoSlowWalkAA()
-    g_Config:FindVar("Aimbot", "Anti Aim", "Fake Angle", "LBY Mode"):SetInt(2)
+    Menu.FindVar("Aimbot", "Anti Aim", "Fake Angle", "LBY Mode"):Set(2)
     if g_ClientState.m_choked_commands >= 1 then
-        g_Config:FindVar("Aimbot", "Anti Aim", "Fake Angle", "Left Limit"):SetInt(48)
-        g_Config:FindVar("Aimbot", "Anti Aim", "Fake Angle", "Right Limit"):SetInt(48)
-        g_Config:FindVar("Aimbot", "Anti Aim", "Main" ,"Modifier Degree"):SetInt(utils.RandomInt(10,13))
-        g_Config:FindVar("Aimbot", "Anti Aim", "Main" ,"Yaw Add"):SetInt(utils.RandomInt(-3,5))
-        g_Config:FindVar("Aimbot", "Anti Aim", "Fake Angle", "Fake Options"):SetInt(4)
+        Menu.FindVar("Aimbot", "Anti Aim", "Fake Angle", "Left Limit"):Set(48)
+        Menu.FindVar("Aimbot", "Anti Aim", "Fake Angle", "Right Limit"):Set(48)
+        Menu.FindVar("Aimbot", "Anti Aim", "Main" ,"Modifier Degree"):Set(utils.RandomInt(10,13))
+        Menu.FindVar("Aimbot", "Anti Aim", "Main" ,"Yaw Add"):Set(utils.RandomInt(-3,5))
+        Menu.FindVar("Aimbot", "Anti Aim", "Fake Angle", "Fake Options"):Set(4)
     else
-        g_Config:FindVar("Aimbot", "Anti Aim", "Main", "Yaw Modifier"):SetInt(1)
-        g_Config:FindVar("Aimbot", "Anti Aim", "Fake Angle", "LBY Mode"):SetInt(1)
-        g_Config:FindVar("Aimbot", "Anti Aim", "Fake Angle", "Left Limit"):SetInt(22)
-        g_Config:FindVar("Aimbot", "Anti Aim", "Fake Angle", "Right Limit"):SetInt(22)
-        g_Config:FindVar("Aimbot", "Anti Aim", "Main", "Modifier Degree"):SetInt(utils.RandomInt(-1, 3))
-        g_Config:FindVar("Aimbot", "Anti Aim", "Fake Angle", "Fake Options"):SetInt(0)
+        Menu.FindVar("Aimbot", "Anti Aim", "Main", "Yaw Modifier"):Set(1)
+        Menu.FindVar("Aimbot", "Anti Aim", "Fake Angle", "LBY Mode"):Set(1)
+        Menu.FindVar("Aimbot", "Anti Aim", "Fake Angle", "Left Limit"):Set(22)
+        Menu.FindVar("Aimbot", "Anti Aim", "Fake Angle", "Right Limit"):Set(22)
+        Menu.FindVar("Aimbot", "Anti Aim", "Main", "Modifier Degree"):Set(utils.RandomInt(-1, 3))
+        Menu.FindVar("Aimbot", "Anti Aim", "Fake Angle", "Fake Options"):Set(0)
     end
-    g_Config:FindVar("Aimbot", "Anti Aim", "Fake Angle", "LBY Mode"):SetInt(0)
+    Menu.FindVar("Aimbot", "Anti Aim", "Fake Angle", "LBY Mode"):Set(0)
 end
 
 local function DoSleepingPill()
     if YawAdd_Brute ~= 0 and YawAdd_Brute <= 5 then
         return
     end
-    g_Config:FindVar("Aimbot", "Anti Aim", "Main", "Pitch"):SetInt(1)
+    Menu.FindVar("Aimbot", "Anti Aim", "Main", "Pitch"):Set(1)
     local isSniper = false
     local entity = get_closest_player()
     if entity ~= nil then
@@ -629,55 +630,55 @@ local function DoSleepingPill()
     
     if g_ClientState.m_choked_commands == 0 then
         if isSniper == true then
-            g_Config:FindVar("Aimbot", "Anti Aim", "Fake Angle", "LBY Mode"):SetInt(1)
-            g_Config:FindVar("Aimbot", "Anti Aim", "Main", "Yaw Modifier"):SetInt(1)
-            g_Config:FindVar("Aimbot", "Anti Aim", "Main" ,"Modifier Degree"):SetInt(utils.RandomInt(-8,8))
-            g_Config:FindVar("Aimbot", "Anti Aim", "Fake Angle", "Left Limit"):SetInt(35)
-            g_Config:FindVar("Aimbot", "Anti Aim", "Fake Angle", "Right Limit"):SetInt(35)
-            g_Config:FindVar("Aimbot", "Anti Aim", "Fake Angle", "Fake Options"):SetInt(3)
-            g_Config:FindVar("Aimbot", "Anti Aim", "Main" ,"Yaw Add"):SetInt(utils.RandomInt(-2,2))
+            Menu.FindVar("Aimbot", "Anti Aim", "Fake Angle", "LBY Mode"):Set(1)
+            Menu.FindVar("Aimbot", "Anti Aim", "Main", "Yaw Modifier"):Set(1)
+            Menu.FindVar("Aimbot", "Anti Aim", "Main" ,"Modifier Degree"):Set(utils.RandomInt(-8,8))
+            Menu.FindVar("Aimbot", "Anti Aim", "Fake Angle", "Left Limit"):Set(35)
+            Menu.FindVar("Aimbot", "Anti Aim", "Fake Angle", "Right Limit"):Set(35)
+            Menu.FindVar("Aimbot", "Anti Aim", "Fake Angle", "Fake Options"):Set(3)
+            Menu.FindVar("Aimbot", "Anti Aim", "Main" ,"Yaw Add"):Set(utils.RandomInt(-2,2))
         else
-            g_Config:FindVar("Aimbot", "Anti Aim", "Fake Angle", "LBY Mode"):SetInt(2)
-            g_Config:FindVar("Aimbot", "Anti Aim", "Main", "Yaw Modifier"):SetInt(utils.RandomInt(-3,6))
-            g_Config:FindVar("Aimbot", "Anti Aim", "Main" ,"Modifier Degree"):SetInt(1)
-            g_Config:FindVar("Aimbot", "Anti Aim", "Fake Angle", "Left Limit"):SetInt(26)
-            g_Config:FindVar("Aimbot", "Anti Aim", "Fake Angle", "Right Limit"):SetInt(26)
-            g_Config:FindVar("Aimbot", "Anti Aim", "Fake Angle", "Fake Options"):SetInt(3)
-            g_Config:FindVar("Aimbot", "Anti Aim", "Main" ,"Yaw Add"):SetInt(utils.RandomInt(-7,7))
+            Menu.FindVar("Aimbot", "Anti Aim", "Fake Angle", "LBY Mode"):Set(2)
+            Menu.FindVar("Aimbot", "Anti Aim", "Main", "Yaw Modifier"):Set(utils.RandomInt(-3,6))
+            Menu.FindVar("Aimbot", "Anti Aim", "Main" ,"Modifier Degree"):Set(1)
+            Menu.FindVar("Aimbot", "Anti Aim", "Fake Angle", "Left Limit"):Set(26)
+            Menu.FindVar("Aimbot", "Anti Aim", "Fake Angle", "Right Limit"):Set(26)
+            Menu.FindVar("Aimbot", "Anti Aim", "Fake Angle", "Fake Options"):Set(3)
+            Menu.FindVar("Aimbot", "Anti Aim", "Main" ,"Yaw Add"):Set(utils.RandomInt(-7,7))
         end
     else
-        g_Config:FindVar("Aimbot", "Anti Aim", "Main", "Yaw Modifier"):SetInt(2)
+        Menu.FindVar("Aimbot", "Anti Aim", "Main", "Yaw Modifier"):Set(2)
         if g_ClientState.m_choked_commands == 1 then
             if isSniper == true then
-                g_Config:FindVar("Aimbot", "Anti Aim", "Fake Angle", "Left Limit"):SetInt(51)
-                g_Config:FindVar("Aimbot", "Anti Aim", "Fake Angle", "Right Limit"):SetInt(51)
+                Menu.FindVar("Aimbot", "Anti Aim", "Fake Angle", "Left Limit"):Set(51)
+                Menu.FindVar("Aimbot", "Anti Aim", "Fake Angle", "Right Limit"):Set(51)
             end
         end
         if g_ClientState.m_choked_commands >= 10 then
             
             if isSniper == true then
-                g_Config:FindVar("Aimbot", "Anti Aim", "Fake Angle", "Left Limit"):SetInt(utils.RandomInt(32,50))
-                g_Config:FindVar("Aimbot", "Anti Aim", "Fake Angle", "Right Limit"):SetInt(utils.RandomInt(32,50))
+                Menu.FindVar("Aimbot", "Anti Aim", "Fake Angle", "Left Limit"):Set(utils.RandomInt(32,50))
+                Menu.FindVar("Aimbot", "Anti Aim", "Fake Angle", "Right Limit"):Set(utils.RandomInt(32,50))
             else
-                g_Config:FindVar("Aimbot", "Anti Aim", "Fake Angle", "Left Limit"):SetInt(40)
-                g_Config:FindVar("Aimbot", "Anti Aim", "Fake Angle", "Right Limit"):SetInt(30)
+                Menu.FindVar("Aimbot", "Anti Aim", "Fake Angle", "Left Limit"):Set(40)
+                Menu.FindVar("Aimbot", "Anti Aim", "Fake Angle", "Right Limit"):Set(30)
             end
-            g_Config:FindVar("Aimbot", "Anti Aim", "Fake Angle", "Fake Options"):SetInt(4)
+            Menu.FindVar("Aimbot", "Anti Aim", "Fake Angle", "Fake Options"):Set(4)
         else
             if isSniper == true then
-                g_Config:FindVar("Aimbot", "Anti Aim", "Fake Angle", "Left Limit"):SetInt(utils.RandomInt(32,47))
-                g_Config:FindVar("Aimbot", "Anti Aim", "Fake Angle", "Right Limit"):SetInt(utils.RandomInt(32,47))
+                Menu.FindVar("Aimbot", "Anti Aim", "Fake Angle", "Left Limit"):Set(utils.RandomInt(32,47))
+                Menu.FindVar("Aimbot", "Anti Aim", "Fake Angle", "Right Limit"):Set(utils.RandomInt(32,47))
             else
-                g_Config:FindVar("Aimbot", "Anti Aim", "Fake Angle", "Left Limit"):SetInt(38)
-                g_Config:FindVar("Aimbot", "Anti Aim", "Fake Angle", "Right Limit"):SetInt(38)
+                Menu.FindVar("Aimbot", "Anti Aim", "Fake Angle", "Left Limit"):Set(38)
+                Menu.FindVar("Aimbot", "Anti Aim", "Fake Angle", "Right Limit"):Set(38)
             end
             if g_ClientState.m_choked_commands >= 1 then
-                g_Config:FindVar("Aimbot", "Anti Aim", "Fake Angle", "LBY Mode"):SetInt(0)
+                Menu.FindVar("Aimbot", "Anti Aim", "Fake Angle", "LBY Mode"):Set(0)
             end
         end
     end
     
-    if ref_slow_walk:GetInt() ~= 0 then
+    if ref_slow_walk:Get() ~= 0 then
         --DoSlowWalkAA()
     end
     
@@ -688,40 +689,40 @@ local function DoSleepyYaw()
     if YawAdd_Brute ~= 0 and YawAdd_Brute <= 5 then
         return
     end
-    g_Config:FindVar("Aimbot", "Anti Aim", "Main", "Pitch"):SetInt(1)
+    Menu.FindVar("Aimbot", "Anti Aim", "Main", "Pitch"):Set(1)
     if g_ClientState.m_choked_commands == 0 then
-        g_Config:FindVar("Aimbot", "Anti Aim", "Fake Angle", "LBY Mode"):SetInt(0)
-        g_Config:FindVar("Aimbot", "Anti Aim", "Main", "Yaw Modifier"):SetInt(3) --offset
-        g_Config:FindVar("Aimbot", "Anti Aim", "Main" ,"Modifier Degree"):SetInt(1)
-        if ref_slow_walk:GetInt() ~= 0 then
-            g_Config:FindVar("Aimbot", "Anti Aim", "Fake Angle", "Left Limit"):SetInt(34)
-            g_Config:FindVar("Aimbot", "Anti Aim", "Fake Angle", "Right Limit"):SetInt(34)
+        Menu.FindVar("Aimbot", "Anti Aim", "Fake Angle", "LBY Mode"):Set(0)
+        Menu.FindVar("Aimbot", "Anti Aim", "Main", "Yaw Modifier"):Set(3) --offset
+        Menu.FindVar("Aimbot", "Anti Aim", "Main" ,"Modifier Degree"):Set(1)
+        if ref_slow_walk:Get() ~= 0 then
+            Menu.FindVar("Aimbot", "Anti Aim", "Fake Angle", "Left Limit"):Set(34)
+            Menu.FindVar("Aimbot", "Anti Aim", "Fake Angle", "Right Limit"):Set(34)
         else
-            g_Config:FindVar("Aimbot", "Anti Aim", "Fake Angle", "Left Limit"):SetInt(26)
-            g_Config:FindVar("Aimbot", "Anti Aim", "Fake Angle", "Right Limit"):SetInt(26)
+            Menu.FindVar("Aimbot", "Anti Aim", "Fake Angle", "Left Limit"):Set(26)
+            Menu.FindVar("Aimbot", "Anti Aim", "Fake Angle", "Right Limit"):Set(26)
         end
         
     else
         if g_ClientState.m_choked_commands >= 1 and g_ClientState.m_choked_commands < 4 and YawAdd_Brute <= 1 then
-            g_Config:FindVar("Aimbot", "Anti Aim", "Main" ,"Modifier Degree"):SetInt(g_ClientState.m_choked_commands)
+            Menu.FindVar("Aimbot", "Anti Aim", "Main" ,"Modifier Degree"):Set(g_ClientState.m_choked_commands)
         end
-        g_Config:FindVar("Aimbot", "Anti Aim", "Fake Angle", "LBY Mode"):SetInt(utils.RandomInt(1,2))
-        g_Config:FindVar("Aimbot", "Anti Aim", "Main", "Yaw Modifier"):SetInt(2) --offset
-        if ref_slow_walk:GetInt() ~= 0 then
-            g_Config:FindVar("Aimbot", "Anti Aim", "Fake Angle", "Left Limit"):SetInt(33)
-            g_Config:FindVar("Aimbot", "Anti Aim", "Fake Angle", "Right Limit"):SetInt(33)
+        Menu.FindVar("Aimbot", "Anti Aim", "Fake Angle", "LBY Mode"):Set(utils.RandomInt(1,2))
+        Menu.FindVar("Aimbot", "Anti Aim", "Main", "Yaw Modifier"):Set(2) --offset
+        if ref_slow_walk:Get() ~= 0 then
+            Menu.FindVar("Aimbot", "Anti Aim", "Fake Angle", "Left Limit"):Set(33)
+            Menu.FindVar("Aimbot", "Anti Aim", "Fake Angle", "Right Limit"):Set(33)
             if g_ClientState.m_choked_commands >= 10 then
-                g_Config:FindVar("Aimbot", "Anti Aim", "Fake Angle", "Left Limit"):SetInt(utils.RandomInt(g_ClientState.m_choked_commands, 34))
-                g_Config:FindVar("Aimbot", "Anti Aim", "Fake Angle", "Right Limit"):SetInt(utils.RandomInt(g_ClientState.m_choked_commands, 34))
+                Menu.FindVar("Aimbot", "Anti Aim", "Fake Angle", "Left Limit"):Set(utils.RandomInt(g_ClientState.m_choked_commands, 34))
+                Menu.FindVar("Aimbot", "Anti Aim", "Fake Angle", "Right Limit"):Set(utils.RandomInt(g_ClientState.m_choked_commands, 34))
             end
-            g_Config:FindVar("Aimbot", "Anti Aim", "Main" ,"Modifier Degree"):SetInt(utils.RandomInt(-1, 1))
+            Menu.FindVar("Aimbot", "Anti Aim", "Main" ,"Modifier Degree"):Set(utils.RandomInt(-1, 1))
         else
             if g_ClientState.m_choked_commands >= 10 then
-                g_Config:FindVar("Aimbot", "Anti Aim", "Fake Angle", "Left Limit"):SetInt(34)
-                g_Config:FindVar("Aimbot", "Anti Aim", "Fake Angle", "Right Limit"):SetInt(34)
+                Menu.FindVar("Aimbot", "Anti Aim", "Fake Angle", "Left Limit"):Set(34)
+                Menu.FindVar("Aimbot", "Anti Aim", "Fake Angle", "Right Limit"):Set(34)
             else
-                g_Config:FindVar("Aimbot", "Anti Aim", "Fake Angle", "Left Limit"):SetInt(26)
-                g_Config:FindVar("Aimbot", "Anti Aim", "Fake Angle", "Right Limit"):SetInt(26)
+                Menu.FindVar("Aimbot", "Anti Aim", "Fake Angle", "Left Limit"):Set(26)
+                Menu.FindVar("Aimbot", "Anti Aim", "Fake Angle", "Right Limit"):Set(26)
             end
         end
     end
@@ -732,38 +733,38 @@ local function DoRandomAA()
     if YawAdd_Brute ~= 0 and YawAdd_Brute <= 5 then
         return
     end
-    g_Config:FindVar("Aimbot", "Anti Aim", "Main", "Pitch"):SetInt(1)
-    g_Config:FindVar("Aimbot", "Anti Aim", "Fake Angle", "Left Limit"):SetInt(utils.RandomInt(Yaw_Limit_Min:GetInt(), Yaw_Limit_Max:GetInt()))
-    g_Config:FindVar("Aimbot", "Anti Aim", "Fake Angle", "Right Limit"):SetInt(utils.RandomInt(Yaw_Limit_Min:GetInt(), Yaw_Limit_Max:GetInt()))
-    g_Config:FindVar("Aimbot", "Anti Aim", "Main" ,"Modifier Degree"):SetInt(utils.RandomInt(0, 5))
-    g_Config:FindVar("Aimbot", "Anti Aim", "Main" ,"Yaw Add"):SetInt(utils.RandomInt(Lagsync_speed:GetInt() * -1, Lagsync_speed:GetInt()))
+    Menu.FindVar("Aimbot", "Anti Aim", "Main", "Pitch"):Set(1)
+    Menu.FindVar("Aimbot", "Anti Aim", "Fake Angle", "Left Limit"):Set(utils.RandomInt(Yaw_Limit_Min:Get(), Yaw_Limit_Max:Get()))
+    Menu.FindVar("Aimbot", "Anti Aim", "Fake Angle", "Right Limit"):Set(utils.RandomInt(Yaw_Limit_Min:Get(), Yaw_Limit_Max:Get()))
+    Menu.FindVar("Aimbot", "Anti Aim", "Main" ,"Modifier Degree"):Set(utils.RandomInt(0, 5))
+    Menu.FindVar("Aimbot", "Anti Aim", "Main" ,"Yaw Add"):Set(utils.RandomInt(Lagsync_speed:Get() * -1, Lagsync_speed:Get()))
 end
 
 local leg_time = 0
-local Leg_Movement = g_Config:FindVar("Aimbot", "Anti Aim", "Misc", "Leg Movement")
+local Leg_Movement = Menu.FindVar("Aimbot", "Anti Aim", "Misc", "Leg Movement")
 local function DoLegAA()
     if leg_time > g_GlobalVars.tickcount then
         leg_time = g_GlobalVars.tickcount
     end
-    if Leg_Movement:GetInt() == 0 then
-        Leg_Movement:SetInt(1)
+    if Leg_Movement:Get() == 0 then
+        Leg_Movement:Set(1)
         leg_time = g_GlobalVars.tickcount
-    elseif Leg_Movement:GetInt() == 1 then
+    elseif Leg_Movement:Get() == 1 then
         if g_GlobalVars.tickcount - leg_time > 0.22 then
-            Leg_Movement:SetInt(2)
+            Leg_Movement:Set(2)
             leg_time = g_GlobalVars.tickcount
         end
-    elseif Leg_Movement:GetInt() == 2 then
+    elseif Leg_Movement:Get() == 2 then
         if g_GlobalVars.tickcount - leg_time > 1.1 then
-            Leg_Movement:SetInt(1)
+            Leg_Movement:Set(1)
             leg_time = g_GlobalVars.tickcount
         end
     end
 end
 
 cheat.RegisterCallback('frame_stage', function()
-    if LegAA:GetBool() == true then
-        local me = g_EntityList:GetLocalPlayer()
+    if LegAA:Get() == true then
+        local me = EntityList.GetClientEntity(EngineClient.GetLocalPlayer())
         if not me then return end
         me:SetProp("m_flPoseParameter", 6, 0)
     end
@@ -789,7 +790,7 @@ local function aim_shot_reset()
                 aim_shots = 0
                 aim_shots_reset = false
                 aim_nextshots = g_GlobalVars.realtime + 0.22
-                g_Config:FindVar("Aimbot", "Anti Aim", "Main" ,"Yaw Add"):SetInt(0)
+                Menu.FindVar("Aimbot", "Anti Aim", "Main" ,"Yaw Add"):Set(0)
             end	
         end
     end
@@ -799,37 +800,34 @@ local inverter = 1
 local function anti_bruteforce()
     if aim_shots >= 1 then
         inverter = inverter * -1
-        g_Config:FindVar("Aimbot", "Anti Aim", "Main" ,"Yaw Add"):SetInt(58 * inverter)
-        g_Config:FindVar("Aimbot", "Anti Aim", "Main" ,"Yaw Add"):SetInt(158 * inverter)
-        g_Config:FindVar("Aimbot", "Anti Aim", "Main" ,"Modifier Degree"):SetInt(58 * inverter)
-        g_Config:FindVar("Aimbot", "Anti Aim", "Main" ,"Modifier Degree"):SetInt(158 * inverter)
-        g_Config:FindVar("Aimbot", "Anti Aim", "Fake Angle", "LBY Mode"):SetInt(0)
+        Menu.FindVar("Aimbot", "Anti Aim", "Main" ,"Yaw Add"):Set(58 * inverter)
+        Menu.FindVar("Aimbot", "Anti Aim", "Main" ,"Yaw Add"):Set(158 * inverter)
+        Menu.FindVar("Aimbot", "Anti Aim", "Main" ,"Modifier Degree"):Set(58 * inverter)
+        Menu.FindVar("Aimbot", "Anti Aim", "Main" ,"Modifier Degree"):Set(158 * inverter)
+        Menu.FindVar("Aimbot", "Anti Aim", "Fake Angle", "LBY Mode"):Set(0)
     end
 end
 
 local function SleepyYawThread(C_UserCmd) -- onCreateMove
-    if SleepyYaw:GetBool() == true and WeaponFired == false then
-        if SleepyYawMode:GetInt() == 0 and E_Peek_Is_Run == false and EdgeYaw_Is_Run == false then
+    if SleepyYaw:Get() == true and WeaponFired == false then
+        if SleepyYawMode:Get() == 0 and E_Peek_Is_Run == false and EdgeYaw_Is_Run == false then
             DoSleepyYaw()
         end
-        if SleepyYawMode:GetInt() == 1 and E_Peek_Is_Run == false and EdgeYaw_Is_Run == false then
+        if SleepyYawMode:Get() == 1 and E_Peek_Is_Run == false and EdgeYaw_Is_Run == false then
             DoSleepingPill()
         end
-        if SleepyYawMode:GetInt() == 2 and E_Peek_Is_Run == false and EdgeYaw_Is_Run == false then
+        if SleepyYawMode:Get() == 2 and E_Peek_Is_Run == false and EdgeYaw_Is_Run == false then
             DoRandomAA()
         end
     end
     
-    if SleepyYaw_On_ShotAA:GetBool() == true then
+    if SleepyYaw_On_ShotAA:Get() == true then
         anti_bruteforce()
         aim_shot_reset()
     end
     
-    if Rand_Sl_Vlo:GetBool() == true then
-        g_Config:FindVar("Aimbot", "Anti Aim", "Misc","Speed"):SetInt(utils.RandomInt(Slow_Walk_Vol_Min:GetInt(), Slow_Walk_Vol_Max:GetInt()))
-    end
     
-    if LegAA:GetBool() == true then
+    if LegAA:Get() == true then
         DoLegAA()
     end
     
@@ -837,7 +835,7 @@ local function SleepyYawThread(C_UserCmd) -- onCreateMove
         YawAdd_Brute = YawAdd_Brute + 1
         if YawAdd_Brute >= 10 then
             YawAdd_Brute = 0
-            g_Config:FindVar("Aimbot", "Anti Aim", "Main", "Yaw Add"):SetInt(0)
+            Menu.FindVar("Aimbot", "Anti Aim", "Main", "Yaw Add"):Set(0)
         end
     end
     
@@ -845,42 +843,42 @@ end
 
 local function SleepyYawEvents(event) -- onEvents
     local event_name = event:GetName()
-    local me = g_EntityList:GetClientEntity(g_EngineClient:GetLocalPlayer())
+    local me = EntityList.GetClientEntity(EngineClient.GetLocalPlayer())
     local localTeam = me:GetProp("m_iTeamNum")
     -- weapon_fire
     if event_name == "weapon_fire" then
-        local userid = g_EngineClient:GetPlayerForUserId(event:GetInt("userid", 0))
-        if userid ~= g_EngineClient:GetLocalPlayer() then
-            if Anti_BruteForce:GetBool() == true then
+        local userid = event:GetInt("userid")
+        if userid ~= EngineClient.GetLocalPlayer() then
+            if Anti_BruteForce:Get() == true then
                 if utils.RandomInt(0, 1) == 1 then
-                    g_Config:FindVar("Aimbot", "Anti Aim", "Fake Angle", "Inverter"):SetBool(true)
+                    Menu.FindVar("Aimbot", "Anti Aim", "Fake Angle", "Inverter"):Set(true)
                 else
-                    g_Config:FindVar("Aimbot", "Anti Aim", "Fake Angle", "Inverter"):SetBool(false)
+                    Menu.FindVar("Aimbot", "Anti Aim", "Fake Angle", "Inverter"):Set(false)
                 end
                 
-                if SleepyYawMode:GetInt() == 1 then
-                    g_Config:FindVar("Aimbot", "Anti Aim", "Fake Angle" ,"Left Limit"):SetInt(utils.RandomInt(48, 52))
-                    g_Config:FindVar("Aimbot", "Anti Aim", "Fake Angle" ,"Right Limit"):SetInt(utils.RandomInt(48, 52))
+                if SleepyYawMode:Get() == 1 then
+                    Menu.FindVar("Aimbot", "Anti Aim", "Fake Angle" ,"Left Limit"):Set(utils.RandomInt(48, 52))
+                    Menu.FindVar("Aimbot", "Anti Aim", "Fake Angle" ,"Right Limit"):Set(utils.RandomInt(48, 52))
                 end
-                g_Config:FindVar("Aimbot", "Anti Aim", "Main" ,"Yaw Add"):SetInt(utils.RandomInt(-40, 40))
-                g_Config:FindVar("Aimbot", "Anti Aim", "Main" ,"Modifier Degree"):SetInt(utils.RandomInt(-40, 40))
+                Menu.FindVar("Aimbot", "Anti Aim", "Main" ,"Yaw Add"):Set(utils.RandomInt(-40, 40))
+                Menu.FindVar("Aimbot", "Anti Aim", "Main" ,"Modifier Degree"):Set(utils.RandomInt(-40, 40))
                 YawAdd_Brute = YawAdd_Brute + 1
             end
         else
-            if SleepyYaw_On_ShotAA:GetBool() == true then
-                g_Config:FindVar("Aimbot", "Anti Aim", "Fake Angle" ,"Desync On Shot"):SetInt(utils.RandomInt(0, 3))
-                g_Config:FindVar("Aimbot", "Anti Aim", "Fake Angle" ,"Left Limit"):SetInt(utils.RandomInt(38, 59))
-                g_Config:FindVar("Aimbot", "Anti Aim", "Fake Angle" ,"Right Limit"):SetInt(utils.RandomInt(32, 59))
+            if SleepyYaw_On_ShotAA:Get() == true then
+                Menu.FindVar("Aimbot", "Anti Aim", "Fake Angle" ,"Desync On Shot"):Set(utils.RandomInt(0, 3))
+                Menu.FindVar("Aimbot", "Anti Aim", "Fake Angle" ,"Left Limit"):Set(utils.RandomInt(38, 59))
+                Menu.FindVar("Aimbot", "Anti Aim", "Fake Angle" ,"Right Limit"):Set(utils.RandomInt(32, 59))
             end
         end
         
-        if userid == g_EngineClient:GetLocalPlayer() then
+        if userid == EngineClient.GetLocalPlayer() then
             shots = shots + 1
         end
     end
     -- round_start
     if event_name == "round_start" then
-        if SleepyYaw:GetBool() == true and WeaponFired == true then
+        if SleepyYaw:Get() == true and WeaponFired == true then
             WeaponFired = false
             DoRandomAA()
         end
@@ -893,58 +891,58 @@ local Recharge_cmd_tick = 0
 local function DoubleTapThread(C_UserCmd) -- onCreateMove
     cmd_tick = C_UserCmd.tick_count
     
-    if g_Config:FindVar("Aimbot", "Ragebot", "Exploits", "Double Tap"):GetBool() == true then
-        if  g_EngineClient:GetNetChannelInfo() == nil then
+    if Menu.FindVar("Aimbot", "Ragebot", "Exploits", "Double Tap"):Get() == true then
+        if  EngineClient.GetNetChannelInfo() == nil then
         else
-            latency =  g_EngineClient:GetNetChannelInfo():GetLatency(0)
+            latency =  EngineClient.GetNetChannelInfo():GetLatency(0)
             Glboal_Ping = math.max(0.0, latency) * 1000.0
         end
         
-        if Enable_DoubleTap:GetBool() == true then
-            if DoubleTap_Mode:GetInt() == 1 then
-                exploits.OverrideDoubleTapSpeed(DT_Tickbase:GetInt())
+        if Enable_DoubleTap:Get() == true then
+            if DoubleTap_Mode:Get() == 1 then
+                exploits.OverrideDoubleTapSpeed(DT_Tickbase:Get())
             else
                 
                 if Glboal_Ping > 100 then
-                    DT_Tickbase:SetInt(13)
+                    DT_Tickbase:Set(13)
                     exploits.OverrideDoubleTapSpeed(13)
                 end
                 
                 if Glboal_Ping > 70 then
-                    DT_Tickbase:SetInt(15)
+                    DT_Tickbase:Set(15)
                     exploits.OverrideDoubleTapSpeed(15)
                 end
                 
                 if Glboal_Ping > 16 and  Glboal_Ping < 58 then
-                    DT_Tickbase:SetInt(16)
+                    DT_Tickbase:Set(16)
                     exploits.OverrideDoubleTapSpeed(16)
                 end
                 
                 if Glboal_Ping < 15 then
-                    DT_Tickbase:SetInt(17)
+                    DT_Tickbase:Set(17)
                     exploits.OverrideDoubleTapSpeed(17)
                 end
                 
             end
-            --exploits.OverrideDoubleTapPreserve(DT_Preserve_Tick:GetInt())
-            if DT_Tickbase:GetInt() < 16 then
-                g_CVar:FindVar("sv_maxusrcmdprocessticks"):SetInt(16)
+            --exploits.OverrideDoubleTapPreserve(DT_Preserve_Tick:Get())
+            if DT_Tickbase:Get() < 16 then
+                CVar.FindVar("sv_maxusrcmdprocessticks"):SetInt(16)
             else
-                g_CVar:FindVar("sv_maxusrcmdprocessticks"):SetInt(16)
+                CVar.FindVar("sv_maxusrcmdprocessticks"):SetInt(16)
             end
-            if g_CVar:FindVar("sv_maxusrcmdprocessticks"):GetInt() >= 16 then
-                g_CVar:FindVar("cl_clock_correction"):SetInt(1)
-                g_CVar:FindVar("cl_clock_correction_adjustment_max_amount"):SetInt(100)
-                g_CVar:FindVar("cl_clock_correction_adjustment_max_offset"):SetInt(800)
-                g_CVar:FindVar("cl_clock_correction_adjustment_min_offset"):SetInt(10)
-                g_CVar:FindVar("cl_clock_correction_force_server_tick"):SetInt(999)
-                g_CVar:FindVar("cl_clockdrift_max_ms"):SetInt(100)
+            if CVar.FindVar("sv_maxusrcmdprocessticks"):GetInt() >= 16 then
+                CVar.FindVar("cl_clock_correction"):SetInt(1)
+                CVar.FindVar("cl_clock_correction_adjustment_max_amount"):SetInt(100)
+                CVar.FindVar("cl_clock_correction_adjustment_max_offset"):SetInt(800)
+                CVar.FindVar("cl_clock_correction_adjustment_min_offset"):SetInt(10)
+                CVar.FindVar("cl_clock_correction_force_server_tick"):SetInt(999)
+                CVar.FindVar("cl_clockdrift_max_ms"):SetInt(100)
             end
         end
     end
     
-    -- if Force_Recharge:GetBool() == true then
-    --     if Recharge_cmd_tick > 1 and (C_UserCmd.tick_count - Recharge_cmd_tick) >= DT_Recharge_Tick:GetInt() * 5 then
+    -- if Force_Recharge:Get() == true then
+    --     if Recharge_cmd_tick > 1 and (C_UserCmd.tick_count - Recharge_cmd_tick) >= DT_Recharge_Tick:Get() * 5 then
     --         if exploits.GetCharge() ~= 1 then
     --             exploits.ForceCharge()
     --         end
@@ -957,9 +955,9 @@ end
 local function DoubleTapEvents(event) -- onCreateMove
     -- local event_name = event:GetName()
     -- if event_name == "weapon_fire" then
-    --     local userid = g_EngineClient:GetPlayerForUserId(event:GetInt("userid", 0))
-    --     if userid == g_EngineClient:GetLocalPlayer() then
-    --         if Force_Recharge:GetBool() == true then
+    --     local userid = EngineClient.GetPlayerForUserId(event:Get("userid", 0))
+    --     if userid == EngineClient.GetLocalPlayer() then
+    --         if Force_Recharge:Get() == true then
     --             Recharge_cmd_tick = cmd_tick
     --         end
     --     end
@@ -980,13 +978,13 @@ local lag_dst = 0.0
 local function DoAdvancedFakeLag()
     local int_alternative_lag = true
     if g_GlobalVars.tickcount % alter_send_cond >= alter_send_limit then
-        g_Config:FindVar("Aimbot", "Anti Aim", "Fake Lag", "Enable Fake Lag"):SetBool(true)
-        g_Config:FindVar("Aimbot", "Anti Aim", "Fake Lag", "Limit"):SetInt(FL_ChockLimit:GetInt())
-        g_Config:FindVar("Aimbot", "Anti Aim", "Fake Lag", "Randomization"):SetInt(alter_send_limit)
-        if FL_ChockLimit:GetInt() == 14 and (FL_velocity > 100) then
-            g_Config:FindVar("Aimbot", "Anti Aim", "Fake Lag", "Limit"):SetInt(14)
+        Menu.FindVar("Aimbot", "Anti Aim", "Fake Lag", "Enable Fake Lag"):Set(true)
+        Menu.FindVar("Aimbot", "Anti Aim", "Fake Lag", "Limit"):Set(FL_ChockLimit:Get())
+        Menu.FindVar("Aimbot", "Anti Aim", "Fake Lag", "Randomization"):Set(alter_send_limit)
+        if FL_ChockLimit:Get() == 14 and (FL_velocity > 100) then
+            Menu.FindVar("Aimbot", "Anti Aim", "Fake Lag", "Limit"):Set(14)
         else
-            g_Config:FindVar("Aimbot", "Anti Aim", "Fake Lag", "Limit"):SetInt(FL_ChockLimit:GetInt())
+            Menu.FindVar("Aimbot", "Anti Aim", "Fake Lag", "Limit"):Set(FL_ChockLimit:Get())
         end
     end
 end
@@ -994,28 +992,28 @@ end
 local traced
 
 local function NormalFL(C_UserCmd)
-    local me = g_EntityList:GetClientEntity(g_EngineClient:GetLocalPlayer())
+    local me = EntityList.GetClientEntity(EngineClient.GetLocalPlayer())
     local player = me:GetPlayer()
     FL_velocity = GetvecVelocity()
     if g_ClientState.m_choked_commands == 0 then
         vec_data = me:GetProp("m_vecOrigin")
         local newz = vec_data.z - 8192
-        local lp_idx = g_EngineClient:GetLocalPlayer()
-        local lp_ent = g_EntityList:GetClientEntity(lp_idx)
-        traced = g_EngineTrace:TraceRay(Vector.new(vec_data.x, vec_data.y, vec_data.z), Vector.new(vec_data.x, vec_data.y, newz), lp_ent, 0xFFFFFFFF)
+        local lp_idx = EngineClient.GetLocalPlayer()
+        local lp_ent = EntityList.GetClientEntity(lp_idx)
+        traced = EngineTrace.TraceRay(Vector.new(vec_data.x, vec_data.y, vec_data.z), Vector.new(vec_data.x, vec_data.y, newz), lp_ent, 0xFFFFFFFF)
         lag_dst = math.abs(traced.endpos.z - vec_data.z)
     end
     
     if lag_dst > 11 then 
-        g_Config:FindVar("Aimbot", "Anti Aim", "Fake Lag", "Limit"):SetInt(1)
-        g_Config:FindVar("Aimbot", "Anti Aim", "Fake Lag", "Randomization"):SetInt(0)
+        Menu.FindVar("Aimbot", "Anti Aim", "Fake Lag", "Limit"):Set(1)
+        Menu.FindVar("Aimbot", "Anti Aim", "Fake Lag", "Randomization"):Set(0)
     end
     
-    alter_send_limit = FL_SendLimit:GetInt() - 1
-    if FL_ChockLimit:GetInt() == 14 then
-        alter_send_cond = FL_SendLimit:GetInt() + FL_ChockLimit:GetInt()
+    alter_send_limit = FL_SendLimit:Get() - 1
+    if FL_ChockLimit:Get() == 14 then
+        alter_send_cond = FL_SendLimit:Get() + FL_ChockLimit:Get()
     else
-        alter_send_cond = 1 + FL_SendLimit:GetInt() + FL_ChockLimit:GetInt()
+        alter_send_cond = 1 + FL_SendLimit:Get() + FL_ChockLimit:Get()
     end
     
     DoAdvancedFakeLag()
@@ -1024,40 +1022,40 @@ end
 local function BetaFL(C_UserCmd)
     
     if g_ClientState.m_choked_commands == 0 then
-        local me = g_EntityList:GetClientEntity(g_EngineClient:GetLocalPlayer())
+        local me = EntityList.GetClientEntity(EngineClient.GetLocalPlayer())
         vec_data = me:GetProp("m_vecOrigin")
         local newz = vec_data.z - 8192
-        local lp_idx = g_EngineClient:GetLocalPlayer()
-        local lp_ent = g_EntityList:GetClientEntity(lp_idx)
-        traced = g_EngineTrace:TraceRay(Vector.new(vec_data.x, vec_data.y, vec_data.z), Vector.new(vec_data.x, vec_data.y, newz), lp_ent, 0xFFFFFFFF)
+        local lp_idx = EngineClient.GetLocalPlayer()
+        local lp_ent = EntityList.GetClientEntity(lp_idx)
+        traced = EngineTrace.TraceRay(Vector.new(vec_data.x, vec_data.y, vec_data.z), Vector.new(vec_data.x, vec_data.y, newz), lp_ent, 0xFFFFFFFF)
         lag_dst = math.abs(traced.endpos.z - vec_data.z)
     end
     
-    alter_send_limit = FL_SendLimit:GetInt() - 1
-    if FL_ChockLimit:GetInt() == 14 then
-        alter_send_cond = FL_SendLimit:GetInt() + FL_ChockLimit:GetInt()
+    alter_send_limit = FL_SendLimit:Get() - 1
+    if FL_ChockLimit:Get() == 14 then
+        alter_send_cond = FL_SendLimit:Get() + FL_ChockLimit:Get()
     else
-        alter_send_cond = 1 + FL_SendLimit:GetInt() + FL_ChockLimit:GetInt()
+        alter_send_cond = 1 + FL_SendLimit:Get() + FL_ChockLimit:Get()
     end
     
     
     FL_velocity = GetvecVelocity()
     if FL_velocity <= 79 then
-        g_Config:FindVar("Aimbot", "Anti Aim", "Fake Lag", "Limit"):SetInt(alter_send_limit)
-        g_Config:FindVar("Aimbot", "Anti Aim", "Fake Lag", "Randomization"):SetInt(0)
+        Menu.FindVar("Aimbot", "Anti Aim", "Fake Lag", "Limit"):Set(alter_send_limit)
+        Menu.FindVar("Aimbot", "Anti Aim", "Fake Lag", "Randomization"):Set(0)
     elseif FL_velocity >= 80 and FL_velocity < 129 then
-        g_Config:FindVar("Aimbot", "Anti Aim", "Fake Lag", "Limit"):SetInt(FL_ChockLimit:GetInt())
+        Menu.FindVar("Aimbot", "Anti Aim", "Fake Lag", "Limit"):Set(FL_ChockLimit:Get())
     elseif FL_velocity >= 130 then
-        g_Config:FindVar("Aimbot", "Anti Aim", "Fake Lag", "Limit"):SetInt(FL_ChockLimit:GetInt())
+        Menu.FindVar("Aimbot", "Anti Aim", "Fake Lag", "Limit"):Set(FL_ChockLimit:Get())
     end
     
     if lag_dst > 11 then 
-        g_Config:FindVar("Aimbot", "Anti Aim", "Fake Lag", "Limit"):SetInt(utils.RandomInt(1,5))
+        Menu.FindVar("Aimbot", "Anti Aim", "Fake Lag", "Limit"):Set(utils.RandomInt(1,5))
     end
 end
 
 local function FakeLagThread(C_UserCmd) -- onCreateMove
-    if FakeLagYawMode:GetInt() == 0 then
+    if FakeLagYawMode:Get() == 0 then
         NormalFL(C_UserCmd)
     else
         BetaFL(C_UserCmd)
@@ -1065,7 +1063,7 @@ local function FakeLagThread(C_UserCmd) -- onCreateMove
 end
 
 local function FakeLagOnDraw()
-    --g_Render:Text(string.format("alter_send_cond:%s", alter_send_limit), Vector2.new(10.0, 15.0), Color.new(1.0, 1.0, 1.0), 16)
+    --Render.Text(string.format("alter_send_cond:%s", alter_send_limit), Vector2.new(10.0, 15.0), Color.new(1.0, 1.0, 1.0), 16)
 end
 --------------------------------------------------------E Peeek--------------------------------------------------------------------------
 local E_PeekStatus = false
@@ -1073,43 +1071,43 @@ local SaveYawBase = 0
 local SavePitch = 0
 local SaveFreeStandingDes = 0
 function IsCan_Do_E_Peek(C_UserCmd)
-    local me = g_EntityList:GetClientEntity(g_EngineClient:GetLocalPlayer())
+    local me = EntityList.GetClientEntity(EngineClient.GetLocalPlayer())
     local Team = me:GetProp("m_iTeamNum")
     if Team == 2 then
         if GetHandWeaponID() ~= 49 then -- not has bomb
-            g_EngineClient:ExecuteClientCmd('-use')
-            g_EngineClient:ExecuteClientCmd('unbind e')
+            EngineClient.ExecuteClientCmd('-use')
+            EngineClient.ExecuteClientCmd('unbind e')
             return true
         else
-            g_EngineClient:ExecuteClientCmd('bind e +use')
+            EngineClient.ExecuteClientCmd('bind e +use')
             return false
         end
     end
     if Team == 3 then
         
-        if E_Peek_Checkhostage:GetBool() == true then
+        if E_Peek_Checkhostage:Get() == true then
             local CarriedHostage = me:GetProp("m_hCarriedHostageProp")
             if CarriedHostage ~= 4294967295 then
-                g_EngineClient:ExecuteClientCmd('-use')
-                g_EngineClient:ExecuteClientCmd('unbind e')
+                EngineClient.ExecuteClientCmd('-use')
+                EngineClient.ExecuteClientCmd('unbind e')
                 return true
             end
         end
         
-        local entity = g_EntityList:GetEntitiesByName("CPlantedC4")
+        local entity = EntityList.GetEntitiesByName("CPlantedC4")
         for i = 1, #entity do
             local Dist = CalcDistance(me:GetProp("m_vecOrigin"),entity[i]:GetProp("m_vecOrigin"))
             if Dist < 4 then
-                g_EngineClient:ExecuteClientCmd('bind e +use')
+                EngineClient.ExecuteClientCmd('bind e +use')
                 return false
             else
-                g_EngineClient:ExecuteClientCmd('-use')
-                g_EngineClient:ExecuteClientCmd('unbind e')
+                EngineClient.ExecuteClientCmd('-use')
+                EngineClient.ExecuteClientCmd('unbind e')
                 return true
             end
         end
         
-        local entity2 = g_EntityList:GetEntitiesByName("CHostage")
+        local entity2 = EntityList.GetEntitiesByName("CHostage")
         local DistTarget = 0
         for i2 = 1, #entity2 do
             local Dist = CalcDistance(me:GetProp("m_vecOrigin"),entity2[i2]:GetProp("m_vecOrigin"))
@@ -1119,50 +1117,50 @@ function IsCan_Do_E_Peek(C_UserCmd)
         end
         
         if DistTarget == 0 then
-            g_EngineClient:ExecuteClientCmd('-use')
-            g_EngineClient:ExecuteClientCmd('unbind e')
+            EngineClient.ExecuteClientCmd('-use')
+            EngineClient.ExecuteClientCmd('unbind e')
             return true
         else
-            g_EngineClient:ExecuteClientCmd('bind e +use')
+            EngineClient.ExecuteClientCmd('bind e +use')
             return false
         end
-        g_EngineClient:ExecuteClientCmd('-use')
-        g_EngineClient:ExecuteClientCmd('unbind e')
+        EngineClient.ExecuteClientCmd('-use')
+        EngineClient.ExecuteClientCmd('unbind e')
         return true
     end
     return false
 end
 
 local function E_PeekOnCreateMove(C_UserCmd)
-    if E_Peek:GetBool() == true then
+    if E_Peek:Get() == true then
         if cheat.IsKeyDown(0x45) == true then
             E_Peek_Is_Run = IsCan_Do_E_Peek(C_UserCmd)
             if E_Peek_Is_Run == true then
                 if E_PeekStatus == false then
-                    SavePitch = g_Config:FindVar("Aimbot", "Anti Aim", "Main", "Pitch"):GetInt()
-                    SaveYawBase = g_Config:FindVar("Aimbot", "Anti Aim", "Main", "Yaw Base"):GetInt()
-                    SaveFreeStandingDes = g_Config:FindVar("Aimbot", "Anti Aim", "Fake Angle", "Freestanding Desync"):GetInt()
+                    SavePitch = Menu.FindVar("Aimbot", "Anti Aim", "Main", "Pitch"):Get()
+                    SaveYawBase = Menu.FindVar("Aimbot", "Anti Aim", "Main", "Yaw Base"):Get()
+                    SaveFreeStandingDes = Menu.FindVar("Aimbot", "Anti Aim", "Fake Angle", "Freestanding Desync"):Get()
                     E_PeekStatus = true
                 end
-                g_Config:FindVar("Aimbot", "Anti Aim", "Main", "Pitch"):SetInt(0)
-                g_Config:FindVar("Aimbot", "Anti Aim", "Main", "Yaw Base"):SetInt(0)
-                g_Config:FindVar("Aimbot", "Anti Aim", "Fake Angle", "Left Limit"):SetInt(E_Peek_YawLimit:GetInt())
-                g_Config:FindVar("Aimbot", "Anti Aim", "Fake Angle", "Right Limit"):SetInt(E_Peek_YawLimit:GetInt())
-                g_Config:FindVar("Aimbot", "Anti Aim", "Main", "Yaw Modifier"):SetInt(1) -- Center
-                g_Config:FindVar("Aimbot", "Anti Aim", "Main" ,"Modifier Degree"):SetInt(E_Peek_YawModifer_Degree:GetInt())
-                g_Config:FindVar("Aimbot", "Anti Aim", "Main" ,"Yaw Add"):SetInt(E_Peek_YawAdd:GetInt())
-                g_Config:FindVar("Aimbot", "Anti Aim", "Fake Angle", "LBY Mode"):SetInt(1) -- Opposite
-                if E_Peek_RealPeek:GetBool() == true then
-                    g_Config:FindVar("Aimbot", "Anti Aim", "Fake Angle", "Freestanding Desync"):SetInt(2)
+                Menu.FindVar("Aimbot", "Anti Aim", "Main", "Pitch"):Set(0)
+                Menu.FindVar("Aimbot", "Anti Aim", "Main", "Yaw Base"):Set(0)
+                Menu.FindVar("Aimbot", "Anti Aim", "Fake Angle", "Left Limit"):Set(E_Peek_YawLimit:Get())
+                Menu.FindVar("Aimbot", "Anti Aim", "Fake Angle", "Right Limit"):Set(E_Peek_YawLimit:Get())
+                Menu.FindVar("Aimbot", "Anti Aim", "Main", "Yaw Modifier"):Set(1) -- Center
+                Menu.FindVar("Aimbot", "Anti Aim", "Main" ,"Modifier Degree"):Set(E_Peek_YawModifer_Degree:Get())
+                Menu.FindVar("Aimbot", "Anti Aim", "Main" ,"Yaw Add"):Set(E_Peek_YawAdd:Get())
+                Menu.FindVar("Aimbot", "Anti Aim", "Fake Angle", "LBY Mode"):Set(1) -- Opposite
+                if E_Peek_RealPeek:Get() == true then
+                    Menu.FindVar("Aimbot", "Anti Aim", "Fake Angle", "Freestanding Desync"):Set(2)
                 end
             end
         else
             if E_PeekStatus == true then
-                g_EngineClient:ExecuteClientCmd('bind e +use')
-                g_Config:FindVar("Aimbot", "Anti Aim", "Main", "Yaw Base"):SetInt(SaveYawBase)
-                g_Config:FindVar("Aimbot", "Anti Aim", "Main", "Pitch"):SetInt(SavePitch)
-                g_Config:FindVar("Aimbot", "Anti Aim", "Fake Angle", "Freestanding Desync"):SetInt(SaveFreeStandingDes)
-                g_Config:FindVar("Aimbot", "Anti Aim", "Main" ,"Modifier Degree"):SetInt(0)
+                EngineClient.ExecuteClientCmd('bind e +use')
+                Menu.FindVar("Aimbot", "Anti Aim", "Main", "Yaw Base"):Set(SaveYawBase)
+                Menu.FindVar("Aimbot", "Anti Aim", "Main", "Pitch"):Set(SavePitch)
+                Menu.FindVar("Aimbot", "Anti Aim", "Fake Angle", "Freestanding Desync"):Set(SaveFreeStandingDes)
+                Menu.FindVar("Aimbot", "Anti Aim", "Main" ,"Modifier Degree"):Set(0)
                 E_Peek_Is_Run = false
                 E_PeekStatus = false
             end
@@ -1176,47 +1174,47 @@ end
 
 local function E_PeekOnDraw()
     -- local weapon_id = GetHandWeaponID()
-    -- local me = g_EntityList:GetClientEntity(g_EngineClient:GetLocalPlayer())
+    -- local me = EntityList.GetClientEntity(EngineClient.GetLocalPlayer())
     -- local flags = me:GetProp("m_iTeamNum")
     -- local IsDefusing = me:GetProp("m_hCarriedHostage")
     
-    -- local entity = g_EntityList:GetEntitiesByName("CHostage") --CHostage CPlantedC4
+    -- local entity = EntityList.GetEntitiesByName("CHostage") --CHostage CPlantedC4
     -- for i = 1, #entity do
     --     local position = entity[i]:GetProp("m_vecOrigin")
-    --     g_Render:Circle3D(position, 128, 18.0, Color.new(1.0, 1.0, 1.0))
-    --     local position2d = g_Render:ScreenPosition(position)
-    --     g_Render:Text(string.format('%s', CalcDistance(me:GetProp("m_vecOrigin"),position)), position2d, Color.new(1.0, 1.0, 1.0, 1.0), 20)
-    --     --g_Render:Text(entity[i]:GetClassName(), position2d, Color.new(1.0, 1.0, 1.0, 1.0), 20)
+    --     Render.Circle3D(position, 128, 18.0, Color.new(1.0, 1.0, 1.0))
+    --     local position2d = Render.ScreenPosition(position)
+    --     Render.Text(string.format('%s', CalcDistance(me:GetProp("m_vecOrigin"),position)), position2d, Color.new(1.0, 1.0, 1.0, 1.0), 20)
+    --     --Render.Text(entity[i]:GetClassName(), position2d, Color.new(1.0, 1.0, 1.0, 1.0), 20)
     -- end
     
     -- for i = 1, 1024 do
-    --     local entity = g_EntityList:GetClientEntity(i)
+    --     local entity = EntityList.GetClientEntity(i)
     --     if entity ~= nil then
     --         if entity:IsPlayer() == false then
     --             local position = entity:GetProp("m_vecOrigin")
-    --             g_Render:Circle3D(position, 128, 18.0, Color.new(1.0, 1.0, 1.0))
-    --             local position2d = g_Render:ScreenPosition(position)
-    --             g_Render:Text(entity:GetClassName(), position2d, Color.new(1.0, 1.0, 1.0, 1.0), 20)
+    --             Render.Circle3D(position, 128, 18.0, Color.new(1.0, 1.0, 1.0))
+    --             local position2d = Render.ScreenPosition(position)
+    --             Render.Text(entity:GetClassName(), position2d, Color.new(1.0, 1.0, 1.0, 1.0), 20)
     --         end 
     --     end
     -- end
 end
 --------------------------------------------------------Indicators--------------------------------------------------------------------------
-local screen = g_EngineClient:GetScreenSize()
+local screen = EngineClient.GetScreenSize()
 
 local function gradient(PosX,PosY,Width,heigh,Col1,Col2)
-    g_Render:GradientBoxFilled(Vector2.new(PosX,PosY), Vector2.new(PosX+Width,PosY+heigh), Col1, Col2, Col1, Col2)
+    Render.GradientBoxFilled(Vector2.new(PosX,PosY), Vector2.new(PosX+Width,PosY+heigh), Col1, Col2, Col1, Col2)
 end
 
 local function gradient2(PosX,PosY,Width,heigh,Col1,Col2)
-    g_Render:GradientBoxFilled(Vector2.new(PosX,PosY), Vector2.new(PosX+Width,PosY+heigh), Col1, Col1, Col2, Col2)
+    Render.GradientBoxFilled(Vector2.new(PosX,PosY), Vector2.new(PosX+Width,PosY+heigh), Col1, Col1, Col2, Col2)
 end
 
 local function Box(PosX,PosY,Width,heigh,Col,Fill)
     if Fill == false then
-        g_Render:Box(Vector2.new(PosX, PosY), Vector2.new(PosX + Width, PosY + heigh), Col)
+        Render.Box(Vector2.new(PosX, PosY), Vector2.new(PosX + Width, PosY + heigh), Col)
     else
-        g_Render:BoxFilled(Vector2.new(PosX, PosY), Vector2.new(PosX + Width, PosY + heigh), Col)
+        Render.BoxFilled(Vector2.new(PosX, PosY), Vector2.new(PosX + Width, PosY + heigh), Col)
     end
 end
 
@@ -1234,61 +1232,61 @@ local function FakeLag_Indicator()
         FakeLag_Max_Weight = 200
     end
     
-    gradient(3 + FL_Pos_X:GetInt(), (screen.y/2) - 36 + FL_Pos_Y:GetInt(), 200, 15, Color.new(0, 0, 0, 222/255), Color.new(0, 0, 0, 33 / 255)) --上灰層
-    gradient(3 + FL_Pos_X:GetInt(), (screen.y/2) - 20 + FL_Pos_Y:GetInt(), 200, 15, Color.new(0, 0, 0, 222/255), Color.new(0, 0, 0, 33 / 255)) --下灰層
+    gradient(3 + FL_Pos_X:Get(), (screen.y/2) - 36 + FL_Pos_Y:Get(), 200, 15, Color.new(0, 0, 0, 222/255), Color.new(0, 0, 0, 33 / 255)) --上灰層
+    gradient(3 + FL_Pos_X:Get(), (screen.y/2) - 20 + FL_Pos_Y:Get(), 200, 15, Color.new(0, 0, 0, 222/255), Color.new(0, 0, 0, 33 / 255)) --下灰層
     
     if chokeValue[4] <= 1 then
         for i = 0,1 do
-            gradient(3 + FL_Pos_X:GetInt(), (screen.y/2) - 21.2 + FL_Pos_Y:GetInt(), FakeLag_Max_Weight, 2, Color.new(FakeLag_Info_Col_middle:GetColor():r(),FakeLag_Info_Col_middle:GetColor():g(),FakeLag_Info_Col_middle:GetColor():b(),0), FakeLag_Info_Col_middle:GetColor())--中間假卡條
+            gradient(3 + FL_Pos_X:Get(), (screen.y/2) - 21.2 + FL_Pos_Y:Get(), FakeLag_Max_Weight, 2, FakeLag_Info_Col_middle:GetColor(),Color.new(0, 0, 0, 0))--中間假卡條
         end
     else
         for i = 0,0 do
-            gradient(3 + FL_Pos_X:GetInt(), (screen.y/2) - 21.2 + FL_Pos_Y:GetInt(), FakeLag_Max_Weight, 2, Color.new(FakeLag_Info_Col_middle:GetColor():r(),FakeLag_Info_Col_middle:GetColor():g(),FakeLag_Info_Col_middle:GetColor():b(),0), FakeLag_Info_Col_middle:GetColor())--中間假卡條
+            gradient(3 + FL_Pos_X:Get(), (screen.y/2) - 21.2 + FL_Pos_Y:Get(), FakeLag_Max_Weight, 2, FakeLag_Info_Col_middle:GetColor(),Color.new(0, 0, 0, 0))--中間假卡條
         end
     end
     
-    gradient(0 + FL_Pos_X:GetInt(), (screen.y/2) - 39 + FL_Pos_Y:GetInt(), 49, 3, FakeLag_Info_Col_Top:GetColor(), Color.new(FakeLag_Info_Col_Top:GetColor():r(), FakeLag_Info_Col_Top:GetColor():g(), FakeLag_Info_Col_Top:GetColor():b(), 0)) --上
-    gradient2(0 + FL_Pos_X:GetInt(), (screen.y/2) - 39 + FL_Pos_Y:GetInt(), 3, 37, FakeLag_Info_Col_Top:GetColor(), FakeLag_Info_Col_bottom:GetColor()) --中
-    gradient(0 + FL_Pos_X:GetInt(), (screen.y/2) - 5 + FL_Pos_Y:GetInt(), 99, 3, FakeLag_Info_Col_bottom:GetColor(), Color.new(FakeLag_Info_Col_bottom:GetColor():r(), FakeLag_Info_Col_bottom:GetColor():g(), FakeLag_Info_Col_bottom:GetColor():b(), 0)) --下
+    gradient(0 + FL_Pos_X:Get(), (screen.y/2) - 39 + FL_Pos_Y:Get(), 49, 3, FakeLag_Info_Col_Top:GetColor(), Color.new(FakeLag_Info_Col_Top:GetColor().r, FakeLag_Info_Col_Top:GetColor().g, FakeLag_Info_Col_Top:GetColor().b, 0)) --上
+    gradient2(0 + FL_Pos_X:Get(), (screen.y/2) - 39 + FL_Pos_Y:Get(), 3, 37, FakeLag_Info_Col_Top:GetColor(), FakeLag_Info_Col_bottom:GetColor()) --中
+    gradient(0 + FL_Pos_X:Get(), (screen.y/2) - 5 + FL_Pos_Y:Get(), 99, 3, FakeLag_Info_Col_bottom:GetColor(), Color.new(FakeLag_Info_Col_bottom:GetColor().r, FakeLag_Info_Col_bottom:GetColor().g, FakeLag_Info_Col_bottom:GetColor().b, 0)) --下
     
-    gradient(0 + FL_Pos_X:GetInt(), (screen.y/2) - 39 + FL_Pos_Y:GetInt(), 77, 3, Color.new(220 / 255, 220 / 255, 220/255, 20/255), Color.new(220 / 255, 220 / 255, 220/255, 0))--上
-    gradient2(0 + FL_Pos_X:GetInt(), (screen.y/2) - 39 + FL_Pos_Y:GetInt(), 3, 37, Color.new(220 / 255, 220 / 255, 220/255, 20/255), Color.new(220 / 255, 220 / 255, 220/255, 0))--中
-    gradient(0 + FL_Pos_X:GetInt(), (screen.y/2) - 5 + FL_Pos_Y:GetInt(), 99, 3, Color.new(220 / 255, 220 / 255, 220/255, 20/255), Color.new(220 / 255, 220 / 255, 220/255, 0))--下
+    gradient(0 + FL_Pos_X:Get(), (screen.y/2) - 39 + FL_Pos_Y:Get(), 77, 3, Color.new(220 / 255, 220 / 255, 220/255, 20/255), Color.new(220 / 255, 220 / 255, 220/255, 0))--上
+    gradient2(0 + FL_Pos_X:Get(), (screen.y/2) - 39 + FL_Pos_Y:Get(), 3, 37, Color.new(220 / 255, 220 / 255, 220/255, 20/255), Color.new(220 / 255, 220 / 255, 220/255, 0))--中
+    gradient(0 + FL_Pos_X:Get(), (screen.y/2) - 5 + FL_Pos_Y:Get(), 99, 3, Color.new(220 / 255, 220 / 255, 220/255, 20/255), Color.new(220 / 255, 220 / 255, 220/255, 0))--下
     
-    g_Render:Text("FAKE LAG:  ", Vector2.new(7 + FL_Pos_X:GetInt(), (screen.y/2) - 35 + FL_Pos_Y:GetInt()), FakeLag_Col_Text:GetColor(), 12, FakeLag_Text_Outline:GetBool())
-    g_Render:Text(string.format('%s', chokeValue[4]), Vector2.new(60 + FL_Pos_X:GetInt(), (screen.y/2) - 35 + FL_Pos_Y:GetInt()), FakeLag_Col_Text:GetColor(), 12)
+    Render.Text("FAKE LAG:  ", Vector2.new(7 + FL_Pos_X:Get(), (screen.y/2) - 35 + FL_Pos_Y:Get()), FakeLag_Col_Text:GetColor(), 12, FakeLag_Text_Outline:Get())
+    Render.Text(string.format('%s', chokeValue[4]), Vector2.new(60 + FL_Pos_X:Get(), (screen.y/2) - 35 + FL_Pos_Y:Get()), FakeLag_Col_Text:GetColor(), 12)
     
-    g_Render:Text("HISTORY:  ", Vector2.new(7 + FL_Pos_X:GetInt(), (screen.y/2) - 18 + FL_Pos_Y:GetInt()), FakeLag_Col_Text:GetColor(), 12, FakeLag_Text_Outline:GetBool())
-    g_Render:Text(string.format('%i-%i-%i-%i    ', chokeValue[4], chokeValue[3], chokeValue[2], chokeValue[1]), Vector2.new(60 + FL_Pos_X:GetInt(), (screen.y/2) - 18 + FL_Pos_Y:GetInt()), FakeLag_Col_Text:GetColor(), 12, FakeLag_Text_Outline:GetBool())
-    g_Render:Text(string.format('M: %i  F: %i', getmax(), getfluctuate()), Vector2.new(144 + FL_Pos_X:GetInt(), (screen.y/2) - 18 + FL_Pos_Y:GetInt()), FakeLag_Col_Text:GetColor(), 12, FakeLag_Text_Outline:GetBool())
+    Render.Text("HISTORY:  ", Vector2.new(7 + FL_Pos_X:Get(), (screen.y/2) - 18 + FL_Pos_Y:Get()), FakeLag_Col_Text:GetColor(), 12, FakeLag_Text_Outline:Get())
+    Render.Text(string.format('%i-%i-%i-%i    ', chokeValue[4], chokeValue[3], chokeValue[2], chokeValue[1]), Vector2.new(60 + FL_Pos_X:Get(), (screen.y/2) - 18 + FL_Pos_Y:Get()), FakeLag_Col_Text:GetColor(), 12, FakeLag_Text_Outline:Get())
+    Render.Text(string.format('M: %i  F: %i', getmax(), getfluctuate()), Vector2.new(144 + FL_Pos_X:Get(), (screen.y/2) - 18 + FL_Pos_Y:Get()), FakeLag_Col_Text:GetColor(), 12, FakeLag_Text_Outline:Get())
     
 end
 
 local function Desync_Indicator()
-    local me = g_EntityList:GetLocalPlayer()
-    gradient(3 + Desync_Pos_X:GetInt(), (screen.y/2) + 3 + Desync_Pos_Y:GetInt(), 200, 15, Color.new(0, 0, 0, 222/255), Color.new(0, 0, 0, 33 / 255)) --上灰層
-    gradient(3 + Desync_Pos_X:GetInt(), (screen.y/2) + 19 + Desync_Pos_Y:GetInt(), 200, 15, Color.new(0, 0, 0, 222/255), Color.new(0, 0, 0, 33 / 255)) --下灰層
+    local me = EngineClient.GetLocalPlayer()
+    gradient(3 + Desync_Pos_X:Get(), (screen.y/2) + 3 + Desync_Pos_Y:Get(), 200, 15, Color.new(0, 0, 0, 222/255), Color.new(0, 0, 0, 33 / 255)) --上灰層
+    gradient(3 + Desync_Pos_X:Get(), (screen.y/2) + 19 + Desync_Pos_Y:Get(), 200, 15, Color.new(0, 0, 0, 222/255), Color.new(0, 0, 0, 33 / 255)) --下灰層
     
-    gradient(0 + Desync_Pos_X:GetInt(), (screen.y/2) + Desync_Pos_Y:GetInt(), 49, 3, Desync_Info_Col_Top:GetColor(), Color.new(Desync_Info_Col_Top:GetColor():r(), Desync_Info_Col_Top:GetColor():g(), Desync_Info_Col_Top:GetColor():b(), 0)) --上
-    gradient2(0 + Desync_Pos_X:GetInt(), (screen.y/2) + Desync_Pos_Y:GetInt(), 3, 37, Desync_Info_Col_Top:GetColor(), Desync_Info_Col_bottom:GetColor()) --中
-    gradient(0 + Desync_Pos_X:GetInt(), (screen.y/2) + 34 + Desync_Pos_Y:GetInt(), 99, 3, Desync_Info_Col_bottom:GetColor(), Color.new(Desync_Info_Col_bottom:GetColor():r(), Desync_Info_Col_bottom:GetColor():g(), Desync_Info_Col_bottom:GetColor():b(), 0)) --下
+    gradient(0 + Desync_Pos_X:Get(), (screen.y/2) + Desync_Pos_Y:Get(), 49, 3, Desync_Info_Col_Top:GetColor(), Color.new(Desync_Info_Col_Top:GetColor().r, Desync_Info_Col_Top:GetColor().g, Desync_Info_Col_Top:GetColor().b, 0)) --上
+    gradient2(0 + Desync_Pos_X:Get(), (screen.y/2) + Desync_Pos_Y:Get(), 3, 37, Desync_Info_Col_Top:GetColor(), Desync_Info_Col_bottom:GetColor()) --中
+    gradient(0 + Desync_Pos_X:Get(), (screen.y/2) + 34 + Desync_Pos_Y:Get(), 99, 3, Desync_Info_Col_bottom:GetColor(), Color.new(Desync_Info_Col_bottom:GetColor().r, Desync_Info_Col_bottom:GetColor().g, Desync_Info_Col_bottom:GetColor().b, 0)) --下
     
     if shots >= 1 then ----開槍閃爍----
-        gradient(0 + Desync_Pos_X:GetInt(), (screen.y/2) + Desync_Pos_Y:GetInt(), 77, 3, Color.new(220 / 255, 220 / 255, 220/255, 100/255), Color.new(0, 0, 0, 0))--上
-        gradient(0 + Desync_Pos_X:GetInt(), (screen.y/2) + Desync_Pos_Y:GetInt(), 22, 37, Color.new(220 / 255, 220 / 255, 220/255, 100/255), Color.new(0, 0, 0, 0))--中
-        gradient(0 + Desync_Pos_X:GetInt(), (screen.y/2) + 34 + Desync_Pos_Y:GetInt(), 99, 3, Color.new(220 / 255, 220 / 255, 220/255, 100/255), Color.new(0, 0, 0, 0))--下
-        gradient(0 + Desync_Pos_X:GetInt(), (screen.y/2) + 18 + Desync_Pos_Y:GetInt(), 203, 2, Color.new(0,0,0,0), Desync_Info_Col_middle:GetColor())--開槍閃爍
+        gradient(0 + Desync_Pos_X:Get(), (screen.y/2) + Desync_Pos_Y:Get(), 77, 3, Color.new(220 / 255, 220 / 255, 220/255, 100/255), Color.new(0, 0, 0, 0))--上
+        gradient(0 + Desync_Pos_X:Get(), (screen.y/2) + Desync_Pos_Y:Get(), 22, 37, Color.new(220 / 255, 220 / 255, 220/255, 100/255), Color.new(0, 0, 0, 0))--中
+        gradient(0 + Desync_Pos_X:Get(), (screen.y/2) + 34 + Desync_Pos_Y:Get(), 99, 3, Color.new(220 / 255, 220 / 255, 220/255, 100/255), Color.new(0, 0, 0, 0))--下
+        gradient(0 + Desync_Pos_X:Get(), (screen.y/2) + 18 + Desync_Pos_Y:Get(), 203, 2, Color.new(0,0,0,0), Desync_Info_Col_middle:GetColor())--開槍閃爍
         shots = 0
     elseif shots == 0 then 
-        gradient(0 + Desync_Pos_X:GetInt(), (screen.y/2) + Desync_Pos_Y:GetInt(), 77, 3, Color.new(220 / 255, 220 / 255, 220/255, 111/255), Color.new(0, 0, 0, 0))--上
-        gradient(0 + Desync_Pos_X:GetInt(), (screen.y/2) + Desync_Pos_Y:GetInt(), 11, 37, Color.new(220 / 255, 220 / 255, 220/255, 111/255), Color.new(0, 0, 0, 0))--中
-        gradient(0 + Desync_Pos_X:GetInt(), (screen.y/2) + 34 + Desync_Pos_Y:GetInt(), 99, 3, Color.new(220 / 255, 220 / 255, 220/255, 111/255), Color.new(0, 0, 0, 0))--下
-        gradient(0 + Desync_Pos_X:GetInt(), (screen.y/2) + 18 + Desync_Pos_Y:GetInt(), (fake_fraction / 60) * 203, 2, Color.new(0,0,0,0), Desync_Info_Col_middle:GetColor())--假身
+        gradient(0 + Desync_Pos_X:Get(), (screen.y/2) + Desync_Pos_Y:Get(), 77, 3, Color.new(220 / 255, 220 / 255, 220/255, 111/255), Color.new(0, 0, 0, 0))--上
+        gradient(0 + Desync_Pos_X:Get(), (screen.y/2) + Desync_Pos_Y:Get(), 11, 37, Color.new(220 / 255, 220 / 255, 220/255, 111/255), Color.new(0, 0, 0, 0))--中
+        gradient(0 + Desync_Pos_X:Get(), (screen.y/2) + 34 + Desync_Pos_Y:Get(), 99, 3, Color.new(220 / 255, 220 / 255, 220/255, 111/255), Color.new(0, 0, 0, 0))--下
+        gradient(0 + Desync_Pos_X:Get(), (screen.y/2) + 18 + Desync_Pos_Y:Get(), (fake_fraction / 60) * 203, 2, Color.new(0,0,0,0), Desync_Info_Col_middle:GetColor())--假身
     end
     --gradient(205, (screen.y/2) + 18, 1, 37, Desync_Info_Col_middle:GetColor(), Color.new(0,0,0,1))--右
-    g_Render:Text("DESYNC: ", Vector2.new(7 + Desync_Pos_X:GetInt(), (screen.y/2) + 5 + Desync_Pos_Y:GetInt()), Desync_Col_Text:GetColor(), 12, Desync_Text_Outline:GetBool())
-    g_Render:Text(string.format('%1.f°    ', fake_fraction), Vector2.new(57 + Desync_Pos_X:GetInt(), (screen.y/2) + 5 + Desync_Pos_Y:GetInt()), Desync_Col_Text:GetColor(), 12, Desync_Text_Outline:GetBool())
-    g_Render:Text(string.format('SleepyYaw %s | %s', LuaVersion,username), Vector2.new(7 + Desync_Pos_X:GetInt(), (screen.y/2) + 20 + Desync_Pos_Y:GetInt()), Desync_Col_Text:GetColor(), 12, Desync_Text_Outline:GetBool())
+    Render.Text("DESYNC: ", Vector2.new(7 + Desync_Pos_X:Get(), (screen.y/2) + 5 + Desync_Pos_Y:Get()), Desync_Col_Text:GetColor(), 12, Desync_Text_Outline:Get())
+    Render.Text(string.format('%1.f°    ', fake_fraction), Vector2.new(57 + Desync_Pos_X:Get(), (screen.y/2) + 5 + Desync_Pos_Y:Get()), Desync_Col_Text:GetColor(), 12, Desync_Text_Outline:Get())
+    Render.Text(string.format('SleepyYaw %s | %s', LuaVersion,username), Vector2.new(7 + Desync_Pos_X:Get(), (screen.y/2) + 20 + Desync_Pos_Y:Get()), Desync_Col_Text:GetColor(), 12, Desync_Text_Outline:Get())
 end
 
 local text_size = 0
@@ -1307,76 +1305,76 @@ local function WaterMark_Indicator()
     local var = screen.x - text_size - 30
     local text = ""
     local x, y, w, h = var - 5 , 10,  text_size + 15, 17
-    local wide = g_Render:CalcTextSize(text, 12)
+    local wide = Render.CalcTextSize(text, 12)
     local latency = 0
     local ip = ""
     -- WaterMark_Col_Top,WaterMark_Col_bottom
     gradient(x,y + 2, text_size + 10, h, WaterMark_Col_Left_Background:GetColor(), WaterMark_Col_Right_Background:GetColor()) -- 灰層
     gradient(x, y, text_size + 10, h - 15, WaterMark_Col_Top:GetColor(), WaterMark_Col_Top_Right:GetColor())--上
-    g_Render:GradientBoxFilled(Vector2.new(x,y + 2), Vector2.new(x + 4,y + h + 2), WaterMark_Col_LeftFill:GetColor(), WaterMark_Col_LeftFill:GetColor(), WaterMark_Col_LeftFill:GetColor(), WaterMark_Col_LeftFill:GetColor())--左柱
+    Render.GradientBoxFilled(Vector2.new(x,y + 2), Vector2.new(x + 4,y + h + 2), WaterMark_Col_LeftFill:GetColor(), WaterMark_Col_LeftFill:GetColor(), WaterMark_Col_LeftFill:GetColor(), WaterMark_Col_LeftFill:GetColor())--左柱
     
-    if g_EngineClient:IsConnected() then
+    if EngineClient.IsConnected() then
         text = " SleepyYaw"
-        g_Render:Text(text, Vector2.new(var,14), WaterMark_Col_Text:GetColor(), 12, WaterMark_Text_Outline:GetBool())
-        wide = g_Render:CalcTextSize(text, 12)
+        Render.Text(text, Vector2.new(var,14), WaterMark_Col_Text:GetColor(), 12, WaterMark_Text_Outline:Get())
+        wide = Render.CalcTextSize(text, 12)
         var = var + wide.x
         -------------------------------------------------------
         text =  " | " .. username
-        g_Render:Text(text, Vector2.new(var,14), WaterMark_Col_Text:GetColor(), 12, WaterMark_Text_Outline:GetBool())
-        wide = g_Render:CalcTextSize(text, 12)
+        Render.Text(text, Vector2.new(var,14), WaterMark_Col_Text:GetColor(), 12, WaterMark_Text_Outline:Get())
+        wide = Render.CalcTextSize(text, 12)
         var = var + wide.x
         -------------------------------------------------------    
-        if g_EngineClient:GetNetChannelInfo() == nil then
+        if EngineClient.GetNetChannelInfo() == nil then
             ip = "None"
         else
-            ip =  g_EngineClient:GetNetChannelInfo():GetAddress()
+            ip =  EngineClient.GetNetChannelInfo():GetAddress()
         end
         text = " | " .. ip
-        g_Render:Text(text, Vector2.new(var, 14), WaterMark_Col_Text:GetColor(), 12)
-        wide = g_Render:CalcTextSize(text, 12)
+        Render.Text(text, Vector2.new(var, 14), WaterMark_Col_Text:GetColor(), 12)
+        wide = Render.CalcTextSize(text, 12)
         var = var + wide.x
         -------------------------------------------------------    
-        if  g_EngineClient:GetNetChannelInfo() == nil then
+        if  EngineClient.GetNetChannelInfo() == nil then
         else
-            latency =  g_EngineClient:GetNetChannelInfo():GetLatency(0)
+            latency =  EngineClient.GetNetChannelInfo():GetLatency(0)
             ping = string.format("%1.f", math.max(0.0, latency) * 1000.0)
         end
         text = " | delay: ".. ping .."ms"
-        g_Render:Text(text, Vector2.new(var,14), WaterMark_Col_Text:GetColor(), 12, WaterMark_Text_Outline:GetBool())
-        wide = g_Render:CalcTextSize(text, 12)
+        Render.Text(text, Vector2.new(var,14), WaterMark_Col_Text:GetColor(), 12, WaterMark_Text_Outline:Get())
+        wide = Render.CalcTextSize(text, 12)
         var = var + wide.x
         -------------------------------------------------------    
         text = " | " .. ticks .. "tick"
-        g_Render:Text(text, Vector2.new(var,14), WaterMark_Col_Text:GetColor(), 12, WaterMark_Text_Outline:GetBool())
-        wide = g_Render:CalcTextSize(text, 12)
+        Render.Text(text, Vector2.new(var,14), WaterMark_Col_Text:GetColor(), 12, WaterMark_Text_Outline:Get())
+        wide = Render.CalcTextSize(text, 12)
         var = var + wide.x
         -------------------------------------------------------   
         text = " | " .. fps .. "fps "
-        g_Render:Text(text, Vector2.new(var,14), WaterMark_Col_Text:GetColor(), 12, WaterMark_Text_Outline:GetBool())
-        wide = g_Render:CalcTextSize(text, 12)
+        Render.Text(text, Vector2.new(var,14), WaterMark_Col_Text:GetColor(), 12, WaterMark_Text_Outline:Get())
+        wide = Render.CalcTextSize(text, 12)
         var = var + wide.x
         -------------------------------------------------------    
     else
         text = " SleepyYaw"
-        g_Render:Text(text, Vector2.new(var,14), WaterMark_Col_Text:GetColor(), 12, WaterMark_Text_Outline:GetBool())
-        wide = g_Render:CalcTextSize(text, 12)
+        Render.Text(text, Vector2.new(var,14), WaterMark_Col_Text:GetColor(), 12, WaterMark_Text_Outline:Get())
+        wide = Render.CalcTextSize(text, 12)
         var = var + wide.x
         -------------------------------------------------------    
         text =  " | " .. username
-        g_Render:Text(text, Vector2.new(var,14), WaterMark_Col_Text:GetColor(), 12, WaterMark_Text_Outline:GetBool())
-        wide = g_Render:CalcTextSize(text, 12)
+        Render.Text(text, Vector2.new(var,14), WaterMark_Col_Text:GetColor(), 12, WaterMark_Text_Outline:Get())
+        wide = Render.CalcTextSize(text, 12)
         var = var + wide.x
         -------------------------------------------------------    
         text = " | " .. fps .. "fps "
-        g_Render:Text(text, Vector2.new(var,14), WaterMark_Col_Text:GetColor(), 12, WaterMark_Text_Outline:GetBool())
-        wide = g_Render:CalcTextSize(text, 12)
+        Render.Text(text, Vector2.new(var,14), WaterMark_Col_Text:GetColor(), 12, WaterMark_Text_Outline:Get())
+        wide = Render.CalcTextSize(text, 12)
         var = var + wide.x
     end
     text_size = var - (screen.x - text_size - 35)
 end
 
-local refk_DT = g_Config:FindVar("Aimbot", "Ragebot", "Exploits", "Double Tap") -- bool
-local refk_HS = g_Config:FindVar("Aimbot", "Ragebot", "Exploits", "Hide Shots") -- bool
+local refk_DT = Menu.FindVar("Aimbot", "Ragebot", "Exploits", "Double Tap") -- bool
+local refk_HS = Menu.FindVar("Aimbot", "Ragebot", "Exploits", "Hide Shots") -- bool
 
 local function Get_Number_of_bullets(weap)
     local weapon_id = weap:GetWeaponID()
@@ -1390,37 +1388,37 @@ local function Get_Number_of_bullets(weap)
 end
 
 local function DoubleTap_Indicator()
-    local me = g_EntityList:GetClientEntity(g_EngineClient:GetLocalPlayer())
+    local me = EntityList.GetClientEntity(EngineClient.GetLocalPlayer())
     local weapon_id = GetHandWeaponID()
     
     local DT_ModeStr = "None"
-    if refk_DT:GetBool() == true then
+    if refk_DT:Get() == true then
         DT_ModeStr = "Double Tap"
     end
     
-    if refk_HS:GetBool() == true and refk_DT:GetBool() == false then
+    if refk_HS:Get() == true and refk_DT:Get() == false then
         DT_ModeStr = "Hide Shots"
     end
     
     
-    gradient(3 + DT_Pos_X:GetInt(), (screen.y/2) - 76 + DT_Pos_Y:GetInt(), 200, 15, Color.new(20 / 255, 20 / 255, 20 / 255, 177 / 255), Color.new(0, 0, 0, 33 / 255)) --上灰層
-    gradient(3 + DT_Pos_X:GetInt(), (screen.y/2) - 60 + DT_Pos_Y:GetInt(), 200, 15, Color.new(20 / 255, 20 / 255, 20 / 255, 177 / 255), Color.new(0, 0, 0, 33 / 255)) --下灰層
+    gradient(3 + DT_Pos_X:Get(), (screen.y/2) - 76 + DT_Pos_Y:Get(), 200, 15, Color.new(20 / 255, 20 / 255, 20 / 255, 177 / 255), Color.new(0, 0, 0, 33 / 255)) --上灰層
+    gradient(3 + DT_Pos_X:Get(), (screen.y/2) - 60 + DT_Pos_Y:Get(), 200, 15, Color.new(20 / 255, 20 / 255, 20 / 255, 177 / 255), Color.new(0, 0, 0, 33 / 255)) --下灰層
     
-    gradient(0 + DT_Pos_X:GetInt(), (screen.y/2) - 61 + DT_Pos_Y:GetInt(), 203, 2, Color.new(DoubleTap_Info_Col_middle:GetColor():r(), DoubleTap_Info_Col_middle:GetColor():g(), DoubleTap_Info_Col_middle:GetColor():b(), 0), Color.new(DoubleTap_Info_Col_middle:GetColor():r(), DoubleTap_Info_Col_middle:GetColor():g(), DoubleTap_Info_Col_middle:GetColor():b(), exploits.GetCharge()))
+    gradient(0 + DT_Pos_X:Get(), (screen.y/2) - 61 + DT_Pos_Y:Get(), 203, 2, Color.new(DoubleTap_Info_Col_middle:GetColor().r, DoubleTap_Info_Col_middle:GetColor().g, DoubleTap_Info_Col_middle:GetColor().b, 0), Color.new(DoubleTap_Info_Col_middle:GetColor().r, DoubleTap_Info_Col_middle:GetColor().g, DoubleTap_Info_Col_middle:GetColor().b, exploits.GetCharge()))
     
-    gradient(0 + DT_Pos_X:GetInt(), (screen.y/2) - 78 + DT_Pos_Y:GetInt(), 49, 3, DoubleTap_Info_Col_Top:GetColor(), Color.new(DoubleTap_Info_Col_Top:GetColor():r(), DoubleTap_Info_Col_Top:GetColor():g(), DoubleTap_Info_Col_Top:GetColor():b(), 0)) --上
-    gradient2(0 + DT_Pos_X:GetInt(), (screen.y/2) - 78 + DT_Pos_Y:GetInt(), 3, 37, DoubleTap_Info_Col_Top:GetColor(), DoubleTap_Info_Col_bottom:GetColor()) --中
-    gradient(0 + DT_Pos_X:GetInt(), (screen.y/2) - 44 + DT_Pos_Y:GetInt(), 99, 3, DoubleTap_Info_Col_bottom:GetColor(), Color.new(DoubleTap_Info_Col_bottom:GetColor():r(), DoubleTap_Info_Col_bottom:GetColor():g(), DoubleTap_Info_Col_bottom:GetColor():b(), 0)) --下
+    gradient(0 + DT_Pos_X:Get(), (screen.y/2) - 78 + DT_Pos_Y:Get(), 49, 3, DoubleTap_Info_Col_Top:GetColor(), Color.new(DoubleTap_Info_Col_Top:GetColor().r, DoubleTap_Info_Col_Top:GetColor().g, DoubleTap_Info_Col_Top:GetColor().b, 0)) --上
+    gradient2(0 + DT_Pos_X:Get(), (screen.y/2) - 78 + DT_Pos_Y:Get(), 3, 37, DoubleTap_Info_Col_Top:GetColor(), DoubleTap_Info_Col_bottom:GetColor()) --中
+    gradient(0 + DT_Pos_X:Get(), (screen.y/2) - 44 + DT_Pos_Y:Get(), 99, 3, DoubleTap_Info_Col_bottom:GetColor(), Color.new(DoubleTap_Info_Col_bottom:GetColor().r, DoubleTap_Info_Col_bottom:GetColor().g, DoubleTap_Info_Col_bottom:GetColor().b, 0)) --下
     
-    gradient(0 + DT_Pos_X:GetInt(), (screen.y/2) - 78 + DT_Pos_Y:GetInt(), 77, 3, Color.new(220 / 255, 220 / 255, 220/255, 20/255), Color.new(220 / 255, 220 / 255, 220/255, 0))--上
-    gradient2(0 + DT_Pos_X:GetInt(), (screen.y/2) - 78 + DT_Pos_Y:GetInt(), 3, 37, Color.new(220 / 255, 220 / 255, 220/255, 20/255), Color.new(220 / 255, 220 / 255, 220/255, 0))--中
-    gradient(0 + DT_Pos_X:GetInt(), (screen.y/2) - 44 + DT_Pos_Y:GetInt(), 99, 3, Color.new(220 / 255, 220 / 255, 220/255, 20/255), Color.new(220 / 255, 220 / 255, 220/255, 0))--下
+    gradient(0 + DT_Pos_X:Get(), (screen.y/2) - 78 + DT_Pos_Y:Get(), 77, 3, Color.new(220 / 255, 220 / 255, 220/255, 20/255), Color.new(220 / 255, 220 / 255, 220/255, 0))--上
+    gradient2(0 + DT_Pos_X:Get(), (screen.y/2) - 78 + DT_Pos_Y:Get(), 3, 37, Color.new(220 / 255, 220 / 255, 220/255, 20/255), Color.new(220 / 255, 220 / 255, 220/255, 0))--中
+    gradient(0 + DT_Pos_X:Get(), (screen.y/2) - 44 + DT_Pos_Y:Get(), 99, 3, Color.new(220 / 255, 220 / 255, 220/255, 20/255), Color.new(220 / 255, 220 / 255, 220/255, 0))--下
     
-    g_Render:Text(string.format("Exploits Mode : [%s]",DT_ModeStr), Vector2.new(7 + DT_Pos_X:GetInt(), (screen.y/2) - 74 + DT_Pos_Y:GetInt()), DoubleTap_Col_Text:GetColor(), 12,DoubleTap_Text_Outline:GetBool())
+    Render.Text(string.format("Exploits Mode : [%s]",DT_ModeStr), Vector2.new(7 + DT_Pos_X:Get(), (screen.y/2) - 74 + DT_Pos_Y:Get()), DoubleTap_Col_Text:GetColor(), 12,DoubleTap_Text_Outline:Get())
     if weapon_id ~= 0 then
-        g_Render:WeaponIcon(weapon_id, Vector2.new(7 + DT_Pos_X:GetInt(), (screen.y/2) - 60 + DT_Pos_Y:GetInt()), Color.new(1.0, 1.0, 1.0), 15)
+        Render.WeaponIcon(weapon_id, Vector2.new(7 + DT_Pos_X:Get(), (screen.y/2) - 60 + DT_Pos_Y:Get()), Color.new(1.0, 1.0, 1.0), 15)
     else
-        g_Render:WeaponIcon(508, Vector2.new(7 + DT_Pos_X:GetInt(), (screen.y/2) - 60 + DT_Pos_Y:GetInt()), Color.new(1.0, 1.0, 1.0), 15)
+        Render.WeaponIcon(508, Vector2.new(7 + DT_Pos_X:Get(), (screen.y/2) - 60 + DT_Pos_Y:Get()), Color.new(1.0, 1.0, 1.0), 15)
     end
     
     if DT_ModeStr == "Double Tap" then
@@ -1429,7 +1427,7 @@ local function DoubleTap_Indicator()
             local weapon = player:GetActiveWeapon()
             for i = 1,Get_Number_of_bullets(weapon) do
                 local num = i - 1
-                g_Render:WeaponIcon(46, Vector2.new((55 + (5 * num) + DT_Pos_X:GetInt()), (screen.y/2) - 60 + DT_Pos_Y:GetInt()), Color.new(1.0, 1.0, 1.0,exploits.GetCharge()), 16)
+                Render.WeaponIcon(46, Vector2.new((55 + (5 * num) + DT_Pos_X:Get()), (screen.y/2) - 60 + DT_Pos_Y:Get()), Color.new(1.0, 1.0, 1.0,exploits.GetCharge()), 16)
             end
         else
         end
@@ -1439,7 +1437,7 @@ local function DoubleTap_Indicator()
     if exploits.GetCharge() == 1 then
         ChargeStatus = "Done"
     end
-    g_Render:Text(string.format("Charge: %s",ChargeStatus), Vector2.new(125 + DT_Pos_X:GetInt(), (screen.y/2) - 58 + DT_Pos_Y:GetInt()), DoubleTap_Col_Text:GetColor(), 12,DoubleTap_Text_Outline:GetBool())
+    Render.Text(string.format("Charge: %s",ChargeStatus), Vector2.new(125 + DT_Pos_X:Get(), (screen.y/2) - 58 + DT_Pos_Y:Get()), DoubleTap_Col_Text:GetColor(), 12,DoubleTap_Text_Outline:Get())
     --g_Render.WeaponIcon(46, Vector2.new(55, (screen.y/2) - 60), Color.new(1.0, 1.0, 1.0), 15)
     --g_Render.WeaponIcon(46, Vector2.new((55 + (5 * 2)), (screen.y/2) - 60), Color.new(1.0, 1.0, 1.0), 15)
     
@@ -1457,39 +1455,39 @@ local function move_painted_ui()
         Desync_drag = false
     end
     if mouse_pressed == true and Desync_drag == true then
-        Desync_Pos_X:SetInt(mouse_pos.x - drag_X)
-        Desync_Pos_Y:SetInt(mouse_pos.y - drag_Y)
+        Desync_Pos_X:Set(mouse_pos.x - drag_X)
+        Desync_Pos_Y:Set(mouse_pos.y - drag_Y)
     end
-    if(mouse_pos.x > Desync_Pos_X:GetInt()) and (mouse_pos.x < Desync_Pos_X:GetInt() + 200) and (mouse_pos.y > (screen.y/2) + Desync_Pos_Y:GetInt()) and (mouse_pos.y < (screen.y/2) + 39 + Desync_Pos_Y:GetInt()) then
+    if(mouse_pos.x > Desync_Pos_X:Get()) and (mouse_pos.x < Desync_Pos_X:Get() + 200) and (mouse_pos.y > (screen.y/2) + Desync_Pos_Y:Get()) and (mouse_pos.y < (screen.y/2) + 39 + Desync_Pos_Y:Get()) then
         Desync_drag = true
-        drag_X = mouse_pos.x - Desync_Pos_X:GetInt()
-        drag_Y = mouse_pos.y - Desync_Pos_Y:GetInt()	
+        drag_X = mouse_pos.x - Desync_Pos_X:Get()
+        drag_Y = mouse_pos.y - Desync_Pos_Y:Get()	
     end
     ----DoubleTap Mouse event
     if mouse_pressed == false and DT_drag == true then
         DT_drag = false
     end
     if mouse_pressed == true and DT_drag == true then
-        DT_Pos_X:SetInt(mouse_pos.x - drag_X)
-        DT_Pos_Y:SetInt(mouse_pos.y - drag_Y)
+        DT_Pos_X:Set(mouse_pos.x - drag_X)
+        DT_Pos_Y:Set(mouse_pos.y - drag_Y)
     end
-    if(mouse_pos.x > DT_Pos_X:GetInt()) and (mouse_pos.x < DT_Pos_X:GetInt() + 200) and (mouse_pos.y > (screen.y/2) - 78 + DT_Pos_Y:GetInt()) and (mouse_pos.y < (screen.y/2) - 50 + DT_Pos_Y:GetInt()) then
+    if(mouse_pos.x > DT_Pos_X:Get()) and (mouse_pos.x < DT_Pos_X:Get() + 200) and (mouse_pos.y > (screen.y/2) - 78 + DT_Pos_Y:Get()) and (mouse_pos.y < (screen.y/2) - 50 + DT_Pos_Y:Get()) then
         DT_drag = true
-        drag_X = mouse_pos.x - DT_Pos_X:GetInt()
-        drag_Y = mouse_pos.y - DT_Pos_Y:GetInt()	
+        drag_X = mouse_pos.x - DT_Pos_X:Get()
+        drag_Y = mouse_pos.y - DT_Pos_Y:Get()	
     end
     ----FAKELAG Mouse event
     if mouse_pressed == false and FL_drag == true then
         FL_drag = false
     end
     if mouse_pressed == true and FL_drag == true then
-        FL_Pos_X:SetInt(mouse_pos.x - drag_X)
-        FL_Pos_Y:SetInt(mouse_pos.y - drag_Y)
+        FL_Pos_X:Set(mouse_pos.x - drag_X)
+        FL_Pos_Y:Set(mouse_pos.y - drag_Y)
     end
-    if(mouse_pos.x > FL_Pos_X:GetInt()) and (mouse_pos.x < FL_Pos_X:GetInt() + 200) and (mouse_pos.y > (screen.y/2) - 39 + FL_Pos_Y:GetInt()) and (mouse_pos.y < (screen.y/2) + FL_Pos_Y:GetInt()) then
+    if(mouse_pos.x > FL_Pos_X:Get()) and (mouse_pos.x < FL_Pos_X:Get() + 200) and (mouse_pos.y > (screen.y/2) - 39 + FL_Pos_Y:Get()) and (mouse_pos.y < (screen.y/2) + FL_Pos_Y:Get()) then
         FL_drag = true
-        drag_X = mouse_pos.x - FL_Pos_X:GetInt()
-        drag_Y = mouse_pos.y - FL_Pos_Y:GetInt()	
+        drag_X = mouse_pos.x - FL_Pos_X:Get()
+        drag_Y = mouse_pos.y - FL_Pos_Y:Get()	
     end
 end
 ------------------------------------------RegisterCallback----------------------------------------------------
@@ -1497,19 +1495,19 @@ end
 local function mod(a, b)
     return a - math.floor(a/b)*b
 end
-local Restore_ClanTag = g_Config:FindVar("Miscellaneous", "Main", "Spammers", "Clantag")
+local Restore_ClanTag = Menu.FindVar("Miscellaneous", "Main", "Spammers", "Clantag")
 local Closed_ClanTag = false
 local ClanTag_Running = false
 local function DoClanTag()
-    if ClanTag_Enable:GetBool() == true then
+    if ClanTag_Enable:Get() == true then
         
-        if Restore_ClanTag:GetBool() == true then
-            Restore_ClanTag:SetBool(false)
+        if Restore_ClanTag:Get() == true then
+            Restore_ClanTag:Set(false)
             Closed_ClanTag = true
         end
         
-        if g_EngineClient:IsConnected() then
-            local netchann_info = g_EngineClient:GetNetChannelInfo()
+        if EngineClient.IsConnected() then
+            local netchann_info = EngineClient.GetNetChannelInfo()
             if netchann_info == nil then 
                 return
             end
@@ -1528,13 +1526,13 @@ local function DoClanTag()
         end
     else
         if ClanTag_Running == true then
-            g_EngineClient:ExecuteClientCmd("cl_clanid 0")
+            EngineClient.ExecuteClientCmd("cl_clanid 0")
         end
     end
 end
 
 local function onCreateMove(C_UserCmd)
-    local me = g_EntityList:GetClientEntity(g_EngineClient:GetLocalPlayer())
+    local me = EntityList.GetClientEntity(EngineClient.GetLocalPlayer())
     if me == nil then -- Fix Crash ?_? idk retarded
         return
     end
@@ -1542,7 +1540,7 @@ local function onCreateMove(C_UserCmd)
     setup_command(C_UserCmd)
     SleepyYawThread(C_UserCmd)
     DoubleTapThread(C_UserCmd)
-    if FakeLagEnable:GetBool() == true then
+    if FakeLagEnable:Get() == true then
         FakeLagThread(C_UserCmd)
     end
     E_PeekOnCreateMove(C_UserCmd)
@@ -1571,19 +1569,19 @@ end
 
 local function onPanel()
     EdgeYaw_Thread()
-    if FakeLag_Indica:GetBool() == true then
+    if FakeLag_Indica:Get() == true then
         FakeLag_Indicator()
     end
     
-    if Desync_Indica:GetBool() == true then
+    if Desync_Indica:Get() == true then
         Desync_Indicator()
     end
     
-    if WaterMark_Enable:GetBool() == true then
+    if WaterMark_Enable:Get() == true then
         WaterMark_Indicator()
     end
     
-    if DoubleTap_Indica:GetBool() == true then
+    if DoubleTap_Indica:Get() == true then
         DoubleTap_Indicator()
     end
     FakeLagOnDraw()
@@ -1597,10 +1595,10 @@ end
 
 local function destroy()
     WeaponFired = false
-    g_EngineClient:ExecuteClientCmd('bind e +use')
+    EngineClient.ExecuteClientCmd('bind e +use')
     DoRandomAA()
     if Closed_ClanTag == true then
-        g_EngineClient:ExecuteClientCmd("cl_clanid 0")
+        EngineClient.ExecuteClientCmd("cl_clanid 0")
     end
 end
 cheat.RegisterCallback("createmove", onCreateMove)
